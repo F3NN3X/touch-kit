@@ -2571,7 +2571,7 @@ dependencies = [
 
 [[package]]
 name = "panel"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "anyhow",
  "log",
@@ -4078,7 +4078,7 @@ checksum = "06bdbd8cfc056b8d2e2e85f29b56a3bdbecb527cef81eb39e3e7b98af4652770"
 
 [[package]]
 name = "touch-core"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "futures-core",
  "hidreport",
@@ -4092,7 +4092,7 @@ dependencies = [
 
 [[package]]
 name = "touchprobe"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "anyhow",
  "clap",

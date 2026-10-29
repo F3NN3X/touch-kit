@@ -24,7 +24,14 @@ touch-kit/
   CHANGELOG.md
 ```
 
-First time on a new machine: do the [driver setup](docs/driver-setup.md), then come back here.
+## Install
+
+1. Download `Touch Panel_<version>_x64-setup.exe` (and `touchprobe.exe` if you want the CLI) from
+   [Releases](https://github.com/F3NN3X/touch-kit/releases). The installer is not code-signed, so
+   Windows SmartScreen asks once: **More info → Run anyway**.
+2. Do the [driver setup](docs/driver-setup.md) — the app's Settings → Driver page guides the Zadig
+   step too.
+3. Start **Touch Panel**; settings open on first run. The app lives in the tray.
 
 ## Build, run, test
 
@@ -44,6 +51,16 @@ cargo run -p touchprobe -- replay ..\..\captures\swipes.jsonl --instant
 ```
 
 Close the panel app before `touchprobe` talks to the device: only one process can claim the interface.
+
+`pnpm tauri build` (in `apps\panel`) builds the Windows installer into
+`target\release\bundle\nsis\`.
+
+### Releasing
+
+Bump the version in `apps/panel/src-tauri/tauri.conf.json`, `apps/panel/package.json` and the three
+`Cargo.toml` files, move the changelog's Unreleased entries under the new version, commit, then push a
+tag: `git tag v1.2.3 && git push origin v1.2.3`. The **Release** workflow tests, builds the installer
+and `touchprobe.exe`, and publishes a GitHub Release with that version's changelog section as notes.
 
 ## The panel app
 
@@ -93,3 +110,7 @@ it within half a second. Every key, its default and the gesture actions: [docs/c
 - [docs/PLAN.md](docs/PLAN.md) — device facts, architecture, gesture state machine, tests, risks,
   and the phase log.
 - [CHANGELOG.md](CHANGELOG.md)
+
+## License
+
+[MIT](LICENSE)

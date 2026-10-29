@@ -1,0 +1,83 @@
+# Pushing a tag `v<version>` tests the workspace, builds the Windows installer and touchprobe.exe,
+# and publishes a GitHub Release whose notes are that version's CHANGELOG.md section.
+# The release stays a draft until every asset is uploaded, so a failed build never publishes.
+
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: apps/panel/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/panel/pnpm-lock.yaml
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install frontend dependencies
+        working-directory: apps/panel
+        run: pnpm install --frozen-lockfile
+
+      - name: Version matches the tag
+        shell: pwsh
+        run: ./.github/scripts/check-version.ps1 -Tag $env:TAG
+
+      - name: Lint and test
+        run: |
+          cargo clippy --workspace --all-targets -- -D warnings
+          cargo test --workspace
+
+      - name: Test frontend
+        working-directory: apps/panel
+        run: |
+          pnpm typecheck
+          pnpm test
+
+      - name: Create draft release
+        id: draft
+        shell: pwsh
+        run: |
+          ./.github/scripts/release-notes.ps1 -Tag $env:TAG -Out release-notes.md
+          gh release create $env:TAG --draft --title "Touch Panel $env:TAG" --notes-file release-notes.md
+          $id = gh api "repos/${{ github.repository }}/releases" --jq ".[] | select(.tag_name == \`"$env:TAG\`") | .id"
+          "id=$id" >> $env:GITHUB_OUTPUT
+
+      - name: Build installer
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: apps/panel
+          tauriScript: pnpm tauri
+          releaseId: ${{ steps.draft.outputs.id }}
+
+      - name: Build and upload touchprobe
+        shell: pwsh
+        run: |
+          cargo build --release -p touchprobe
+          gh release upload $env:TAG target/release/touchprobe.exe
+
+      - name: Publish release
+        run: gh release edit ${{ github.ref_name }} --draft=false

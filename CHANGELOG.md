@@ -1,9 +1,13 @@
 # Changelog
 
 All notable changes to touch-kit. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
-Nothing is released yet; every crate and the app are at 0.1.0.
+Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
+
+## [1.0.0] - 2026-10-29
+
+First public release: the panel app as a Windows installer, plus `touchprobe`.
 
 ### Added
 
@@ -55,3 +59,6 @@ Nothing is released yet; every crate and the app are at 0.1.0.
   panels finished starting.
 - Identify and calibration reached every panel window instead of only the one asked.
 - The settings calibration hint stayed on "tap the targets" after calibrating.
+
+[Unreleased]: https://github.com/F3NN3X/touch-kit/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/F3NN3X/touch-kit/releases/tag/v1.0.0

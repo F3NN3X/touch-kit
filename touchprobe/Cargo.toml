@@ -1,6 +1,6 @@
 [package]
 name = "touchprobe"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 description = "Read a USB HID touch panel directly over WinUSB/libusb, bypassing the OS touch stack"
 license = "MIT"

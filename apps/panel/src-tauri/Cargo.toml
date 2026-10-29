@@ -1,8 +1,8 @@
 [package]
 name = "panel"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
-description = "Touch panel prototype driven by raw USB touch input"
+description = "Touch panel app driven by raw USB touch input"
 license = "MIT"
 
 [lib]
@@ -14,7 +14,7 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 touch-core = { path = "../../../crates/touch-core" }
-tauri = { version = "2", features = ["tray-icon"] }
+tauri = { version = "2", features = ["tray-icon", "devtools"] }  # devtools: dev mode opens them in release builds too
 tauri-plugin-log = "2"
 tauri-plugin-opener = "2"
 log = "0.4"
