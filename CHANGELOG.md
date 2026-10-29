@@ -5,6 +5,12 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Display reports could include local file paths (and so the Windows user name) when
+  `testing.replay` or a panel's `device.descriptor_file` named a file; they now keep only the file
+  name.
+
 ## [1.1.0] - 2026-10-29
 
 Any USB touchscreen, one-touch setup, display reports, and a panel UI for any screen size.

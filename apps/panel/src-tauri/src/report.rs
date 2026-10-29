@@ -78,7 +78,7 @@ pub async fn report_create(
         created_utc: utc(now()),
         os: os(),
         monitors,
-        config: cfg,
+        config: shareable(cfg),
         touchscreens,
         recordings,
         recording_errors,
@@ -153,6 +153,22 @@ fn gather(app: &AppHandle, cfg: &AppConfig, record_seconds: u32) -> Result<Gathe
     Ok((devices, recordings, errors))
 }
 
+/// The config without local paths (they carry the user name): a replay or descriptor file is
+/// reduced to its file name.
+fn shareable(mut cfg: AppConfig) -> AppConfig {
+    let name_only = |p: &std::path::Path| p.file_name().map_or_else(|| "<file>".into(), |n| n.to_string_lossy().into_owned());
+    let replay = &cfg.testing.replay;
+    if !crate::testing::BUILT_IN.contains(&replay.as_str()) && replay != "none" {
+        cfg.testing.replay = name_only(std::path::Path::new(replay));
+    }
+    for p in &mut cfg.panels {
+        if let Some(f) = &p.device.descriptor_file {
+            p.device.descriptor_file = Some(name_only(f).into());
+        }
+    }
+    cfg
+}
+
 fn monitors(app: &AppHandle) -> Result<Vec<Monitor>, String> {
     let main = app.primary_monitor().ok().flatten().map(|m| *m.position());
     Ok(app
@@ -209,6 +225,18 @@ fn utc(secs: u64) -> String {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn shared_config_has_no_local_paths() {
+        let mut cfg = crate::config::AppConfig::default();
+        cfg.testing.replay = r"C:\Users\someone\captures\mine.jsonl".into();
+        cfg.panels[0].device.descriptor_file = Some(r"C:\Users\someone\rd.bin".into());
+        let json = serde_json::to_string(&super::shareable(cfg)).unwrap();
+        assert!(!json.contains("someone"), "{json}");
+        assert!(json.contains("mine.jsonl") && json.contains("rd.bin"));
+        let builtin = super::shareable(crate::config::AppConfig::default());
+        assert_eq!(builtin.testing.replay, "all", "built-in names stay");
+    }
+
     #[test]
     fn utc_formats_unix_seconds() {
         assert_eq!(super::utc(0), "1970-01-01T00:00:00Z");
