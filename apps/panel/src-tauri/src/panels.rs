@@ -189,7 +189,7 @@ fn start_all(app: &AppHandle, cfg: &AppConfig, generation: u32) -> (Vec<Running>
         let at = format!("panels[{i}] \"{}\"", entry.name);
         let Some(mon) = window::pick_monitor(&monitors, entry, &taken_monitors).cloned() else {
             issues.push(Issue::warning(format!(
-                "{at}: no free monitor matches ({}x{}); set its \"monitor\"",
+                "{at}: no free monitor matches ({}x{}); run Set up panels in settings, or pick its monitor",
                 entry.panel.width_px, entry.panel.height_px
             )));
             continue;
@@ -219,7 +219,7 @@ fn start_virtual(app: &AppHandle, cfg: &AppConfig, generation: u32) -> anyhow::R
         size: [main.size().width, main.size().height],
     };
     let base = touch_core::PanelConfig::default();
-    let spots = testing::slots(&info, main.scale_factor(), [base.width_px, base.height_px], cfg.testing.virtual_panels.into());
+    let spots = testing::slots(&info, main.scale_factor(), cfg.testing.size, cfg.testing.virtual_panels.into());
     let mut running = Vec::new();
     for (k, spot) in spots.into_iter().enumerate() {
         let index = cfg.panels.len() + k;

@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Panel windows (panel-<generation>-<index>) and the pairing window: core APIs only; subscribe is an app command",
-  "windows": ["panel-*", "pair"],
+  "description": "Panel windows (panel-<generation>-<index>) the pairing window, the setup windows (setup-<k>) and the report's recording prompts (record-<k>): core APIs only; subscribe is an app command",
+  "windows": ["panel-*", "pair", "setup-*", "record-*"],
   "permissions": ["core:default"]
 }

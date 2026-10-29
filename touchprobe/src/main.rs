@@ -15,10 +15,10 @@ use touch_core::{hid, touch, Config, DeviceMsg, Gesture, Output, Pacing, Pointer
 #[derive(Parser)]
 #[command(name = "touchprobe", version, about)]
 struct Cli {
-    /// USB vendor id (hex) [default: 222A]
+    /// USB vendor id (hex) [default: any touchscreen]
     #[arg(long, value_parser = parse_hex16, global = true)]
     vid: Option<u16>,
-    /// USB product id (hex) [default: 0001]
+    /// USB product id (hex) [default: any touchscreen]
     #[arg(long, value_parser = parse_hex16, global = true)]
     pid: Option<u16>,
     /// Interface number (default: first HID interface)
@@ -36,8 +36,17 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Cmd {
-    /// List USB devices (marks the target)
+    /// List USB devices (marks touchscreens)
     List,
+    /// Write a JSON report of every touchscreen: USB and HID details, optionally a touch recording
+    Report {
+        /// Output file
+        #[arg(long, default_value = "touch-report.json")]
+        out: PathBuf,
+        /// Also record this many seconds of touches on every ready touchscreen (0 = no recording)
+        #[arg(long, default_value_t = 0)]
+        record: u64,
+    },
     /// Show interfaces/endpoints, fetch and decode the HID report descriptor
     Info {
         /// Folder to save report-descriptor.bin / .txt into
@@ -112,6 +121,7 @@ fn main() -> Result<()> {
     let cfg = load_config(&cli)?;
     match &cli.cmd {
         Cmd::List => list(&cfg),
+        Cmd::Report { out, record } => report(&cfg, out, *record),
         Cmd::Info { save } => info(&cfg, save),
         Cmd::Raw { count } => raw(&cfg, *count),
         Cmd::Record { out, seconds } => record(&cfg, out, *seconds),
@@ -138,11 +148,11 @@ fn load_config(cli: &Cli) -> Result<Config> {
             .with_context(|| format!("parsing {}", path.display()))?,
         None => Config::default(),
     };
-    if let Some(v) = cli.vid {
-        cfg.device.vid = v;
+    if cli.vid.is_some() {
+        cfg.device.vid = cli.vid;
     }
-    if let Some(p) = cli.pid {
-        cfg.device.pid = p;
+    if cli.pid.is_some() {
+        cfg.device.pid = cli.pid;
     }
     if cli.iface.is_some() {
         cfg.device.iface = cli.iface;
@@ -164,8 +174,14 @@ fn open(cfg: &Config) -> Result<Panel> {
 }
 
 fn list(cfg: &Config) -> Result<()> {
+    let touch = usb::candidates(&cfg.device)?;
     for d in nusb::list_devices().wait()? {
-        let mark = if d.vendor_id() == cfg.device.vid && d.product_id() == cfg.device.pid { "  <== target" } else { "" };
+        let port = usb::location(&d);
+        let mark = match touch.iter().find(|t| t.port == port) {
+            Some(t) if t.ready => "  <== touchscreen, ready",
+            Some(_) => "  <== touchscreen, needs the WinUSB driver (docs/driver-setup.md)",
+            None => "",
+        };
         #[cfg(target_os = "windows")]
         let drv = format!(" driver={}", d.driver().unwrap_or("?"));
         #[cfg(not(target_os = "windows"))]
@@ -177,11 +193,27 @@ fn list(cfg: &Config) -> Result<()> {
             d.manufacturer_string().unwrap_or("-"),
             d.product_string().unwrap_or("-"),
             d.serial_number().unwrap_or("-"),
-            usb::location(&d),
+            port,
             drv,
             mark
         );
     }
+    Ok(())
+}
+
+/// The device part of the app's display report (no monitors or app config).
+fn report(cfg: &Config, out: &PathBuf, seconds: u64) -> Result<()> {
+    let devices = touch_core::report::devices()?;
+    println!("{} touchscreen(s)", devices.len());
+    let mut recordings = Vec::new();
+    for d in devices.iter().filter(|d| d.ready && seconds > 0) {
+        println!("recording {} for {seconds} s: tap, swipe, pinch, hold, then many fingers...", d.port);
+        let p = touch_core::report::open(&d.port)?;
+        recordings.push(touch_core::report::record(&p, &cfg.panel, Duration::from_secs(seconds), || false)?);
+    }
+    let json = serde_json::json!({ "touchscreens": devices, "recordings": recordings });
+    std::fs::write(out, serde_json::to_string_pretty(&json)?).with_context(|| format!("writing {}", out.display()))?;
+    println!("wrote {}", out.display());
     Ok(())
 }
 

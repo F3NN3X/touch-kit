@@ -60,6 +60,16 @@ export function DriverPage() {
       </Section>
     );
   }
+  if (view.ids.length === 0) {
+    return (
+      <Section title="Touchscreens">
+        <p className="py-3 text-sm text-zinc-400">
+          No touchscreen found. Plug in the display's touch USB cable; it shows up here by itself, with the steps to
+          set it up.
+        </p>
+      </Section>
+    );
+  }
   return (
     <>
       {view.ids.map(([vid, pid]) => {
@@ -68,10 +78,10 @@ export function DriverPage() {
         const needsSetup = devices.some((d) => !isWinUsb(d));
         return (
           <div key={id}>
-            <Section title={`Touch devices ${id}`}>
+            <Section title={`Touchscreen ${id}`}>
               {devices.length === 0 && (
                 <p className="py-3 text-sm text-zinc-400">
-                  None connected. Plug in the panel's touch USB cable; it shows up here by itself.
+                  None connected. Plug in its touch USB cable; it shows up here by itself.
                 </p>
               )}
               {devices.map((d) => (

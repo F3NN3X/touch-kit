@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { Status } from "../touch/types";
 import { fileValue, useMonitors, usePanelStatus, type ConfigView, type Json, type PanelEntry } from "./api";
 import { Button, NumberField, Row, Select, TextField, Toggle, useSave } from "./controls";
+import { SetupBar } from "./SetupBar";
 
 const ROTATIONS = ["0", "90", "180", "270"].map((r) => ({ value: r, label: `${r}°` }));
 
@@ -116,6 +117,7 @@ export function PanelsPage({ view }: { view: ConfigView }) {
 
   return (
     <>
+      <SetupBar />
       {panels.map((p: PanelEntry, i) => {
         const st = status.find((s) => s.index === i);
         const touch = st ? touchText(st.touch) : { text: "not running · see the issues above", tone: "text-amber-300" };
@@ -198,8 +200,8 @@ export function PanelsPage({ view }: { view: ConfigView }) {
                 label="USB port"
                 hint={
                   p.device.port
-                    ? `Pinned to ${shortPort(p.device.port)}. Unpin to take the first free device with its ids.`
-                    : "Not pinned: takes the first free device with its ids. Pairing pins it."
+                    ? `Pinned to ${shortPort(p.device.port)}. Unpin to take the first free touchscreen.`
+                    : "Not pinned: takes the first free touchscreen. Set up panels and Pair pin it."
                 }
                 isSet={isSet(i, "device.port")}
                 onReset={() => setPanel(i, "device.port", null)}

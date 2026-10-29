@@ -21,12 +21,13 @@ applies the file and shows in amber. Both go to the log.
 | `testing.enabled` | `false` | Testing mode: virtual panels in normal windows on the main monitor, fed by recorded touches in a loop instead of a USB device. Real panels keep running. Settings → Testing. |
 | `testing.virtual_panels` | `1` | How many (1–4). |
 | `testing.replay` | `"all"` | `all`, `tap`, `swipes`, `two-finger`, `hold` (the `captures/`, built in), `none` (idle; use the mouse), or a `touchprobe record` file path. |
+| `testing.size` | `[1920, 550]` | Each virtual panel's size in CSS px (320–3840), to try the panel UI at other displays' resolutions. |
 | `actions` | see below | Recognised gesture → action. Replaces the defaults when present. |
 | `panels` | one default panel | List of panels; each entry takes the keys below (`panels[0].name`, ...). |
 | `…name` | `"Panel 1"` | Shown in settings, the log and Identify. |
-| `…monitor` | unset | `{"name": "\\\\.\\DISPLAY4"}` and/or `{"position": [x, y]}`. Unset: first free monitor of the panel's size. |
-| `…device.vid`, `device.pid` | `0x222A`, `0x0001` | USB ids (decimal in JSON: 8746, 1). |
-| `…device.port` | unset | USB location (`touchprobe list` shows `port=`). Pins one of several identical panels; this one has no serial. If the port is gone, the panel takes the only free device with its ids. |
+| `…monitor` | unset | `{"name": "\\\\.\\DISPLAY4"}` and/or `{"position": [x, y]}`; set by **Set up panels**. Unset: first free monitor of the panel's size. |
+| `…device.vid`, `device.pid` | unset | USB ids (decimal in JSON, e.g. 8746, 1 for `222a:0001`). Unset: any touchscreen (a HID Touch Screen collection), any make. Set both to use a device by id even if it doesn't report as one; set only `vid` for any product of that vendor. |
+| `…device.port` | unset | USB location (`touchprobe list` shows `port=`). Pins one of several touchscreens; set by **Set up panels** and **Pair**. If the port is gone, the panel takes the only free touchscreen it accepts. |
 | `…device.iface` | first HID | Interface number. |
 | `…device.device_mode` | `2` | Device Mode to send on open, if the descriptor has one (this panel doesn't). `null` skips. |
 | `…device.descriptor_file` | unset | Report descriptor file instead of asking the device. |

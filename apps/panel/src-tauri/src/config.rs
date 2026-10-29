@@ -39,11 +39,14 @@ pub struct Testing {
     /// What they play: a built-in capture (`all`, `tap`, `swipes`, `two-finger`, `hold`), `none`
     /// (idle; drive it with the mouse) or a `touchprobe record` file.
     pub replay: String,
+    /// Size of each virtual panel in CSS px (the window is this × the main monitor's scaling), to try
+    /// the UI at other displays' resolutions.
+    pub size: [u32; 2],
 }
 
 impl Default for Testing {
     fn default() -> Self {
-        Self { enabled: false, virtual_panels: 1, replay: "all".into() }
+        Self { enabled: false, virtual_panels: 1, replay: "all".into(), size: [1920, 550] }
     }
 }
 
@@ -245,6 +248,9 @@ pub fn check(text: &str) -> Loaded {
     if !(1..=4).contains(&cfg.testing.virtual_panels) {
         issues.push(Issue::error("testing.virtual_panels must be between 1 and 4"));
     }
+    if cfg.testing.size.iter().any(|v| !(320..=3840).contains(v)) {
+        issues.push(Issue::error("testing.size: width and height must be between 320 and 3840"));
+    }
     let replay = &cfg.testing.replay;
     if !crate::testing::BUILT_IN.contains(&replay.as_str()) && replay != "none" && !Path::new(replay).is_file() {
         issues.push(Issue::error(format!("testing.replay: \"{replay}\" is no built-in capture and no file")));
@@ -312,7 +318,7 @@ mod tests {
         assert_eq!(cfg.panels[0].name, "Panel 1");
         assert_eq!(cfg.panels[0].panel.rotation, touch_core::Rotation::R180);
         assert_eq!(cfg.panels[0].panel.width_px, 1920);
-        assert_eq!(cfg.panels[1].device.vid, 0x222A);
+        assert_eq!(cfg.panels[1].device.vid, None, "no ids: any touchscreen");
         assert_eq!(cfg.panels[1].monitor, None);
         assert_eq!(cfg.panels[1].touch(&cfg.gestures).gestures.slop_px, 20.0, "gestures are shared");
         assert_eq!(AppConfig::default().panels, vec![PanelEntry::default()], "no panels key: one default panel");

@@ -21,7 +21,7 @@ pub struct DriverDevice {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct DriverView {
-    /// Every vid:pid the configured panels use, connected or not.
+    /// The vid:pid of every touchscreen found, plus any a panel names explicitly (connected or not).
     ids: Vec<[u16; 2]>,
     devices: Vec<DriverDevice>,
     /// Whether this platform swaps drivers at all (Windows) or detaches the kernel driver (Linux).
@@ -30,17 +30,24 @@ pub struct DriverView {
 
 #[tauri::command]
 pub fn driver_status(current: State<'_, Mutex<AppConfig>>) -> Result<DriverView, String> {
+    let configs: Vec<touch_core::DeviceConfig> = current.lock().unwrap().panels.iter().map(|p| p.device.clone()).collect();
     let mut ids: Vec<[u16; 2]> = Vec::new();
-    for p in &current.lock().unwrap().panels {
-        let id = [p.device.vid, p.device.pid];
-        if !ids.contains(&id) {
-            ids.push(id);
+    let mut devices: Vec<DriverDevice> = Vec::new();
+    for cfg in &configs {
+        if let (Some(vid), Some(pid)) = (cfg.vid, cfg.pid) {
+            if !ids.contains(&[vid, pid]) {
+                ids.push([vid, pid]);
+            }
+        }
+        for c in touch_core::usb::candidates(cfg).map_err(|e| e.to_string())? {
+            if !devices.iter().any(|d| d.port == c.port) {
+                devices.push(DriverDevice { vid: c.vid, pid: c.pid, port: c.port, product: c.product, driver: c.driver });
+            }
         }
     }
-    let mut devices = Vec::new();
-    for [vid, pid] in &ids {
-        for c in touch_core::usb::candidates(*vid, *pid).map_err(|e| e.to_string())? {
-            devices.push(DriverDevice { vid: *vid, pid: *pid, port: c.port, product: c.product, driver: c.driver });
+    for d in &devices {
+        if !ids.contains(&[d.vid, d.pid]) {
+            ids.push([d.vid, d.pid]);
         }
     }
     Ok(DriverView { ids, devices, windows: cfg!(windows) })

@@ -2,6 +2,7 @@
 //! interrupt-IN reader that reassembles reports longer than one packet.
 
 use crate::config::DeviceConfig;
+use crate::discover::{self, Touchscreen};
 use crate::hid::{self, Kind, ReportDescriptor};
 use crate::touch::{U_CONTACT_MAX, U_DEVICE_MODE};
 use crate::Error;
@@ -35,38 +36,27 @@ pub fn location(d: &nusb::DeviceInfo) -> String {
     format!("{}-{}", d.bus_id(), chain.join("."))
 }
 
-/// A connected device with the panel's vid:pid, for settings and pairing.
-#[derive(Clone, Debug, PartialEq, serde::Serialize)]
-pub struct Candidate {
-    pub port: String,
-    pub serial: Option<String>,
-    pub product: Option<String>,
-    /// The bound driver service (`WinUSB`, `HidUsb`, ...). Windows only; `None` elsewhere.
-    pub driver: Option<String>,
+/// The connected devices `cfg` may use, for settings and pairing. With both ids set: every device
+/// with them, touchscreen or not. Otherwise every touchscreen whose ids fit (`discover`).
+pub fn candidates(cfg: &DeviceConfig) -> Result<Vec<Touchscreen>, Error> {
+    if let (Some(vid), Some(pid)) = (cfg.vid, cfg.pid) {
+        return Ok(list()?
+            .iter()
+            .filter(|d| d.vendor_id() == vid && d.product_id() == pid)
+            .map(|d| discover::entry(d, discover::readable(d)))
+            .collect());
+    }
+    Ok(discover::touchscreens()?.into_iter().filter(|t| cfg.accepts(t.vid, t.pid)).collect())
 }
 
-/// Every connected device with this vid:pid.
-pub fn candidates(vid: u16, pid: u16) -> Result<Vec<Candidate>, Error> {
-    Ok(matching(vid, pid)?
-        .iter()
-        .map(|d| Candidate {
-            port: location(d),
-            serial: d.serial_number().map(str::to_string),
-            product: d.product_string().map(str::to_string),
-            #[cfg(target_os = "windows")]
-            driver: d.driver().map(str::to_string),
-            #[cfg(not(target_os = "windows"))]
-            driver: None,
-        })
-        .collect())
+fn list() -> Result<Vec<nusb::DeviceInfo>, Error> {
+    Ok(nusb::list_devices().wait().map_err(|e| usb("listing USB devices", e))?.collect())
 }
 
-fn matching(vid: u16, pid: u16) -> Result<Vec<nusb::DeviceInfo>, Error> {
-    Ok(nusb::list_devices()
-        .wait()
-        .map_err(|e| usb("listing USB devices", e))?
-        .filter(|d| d.vendor_id() == vid && d.product_id() == pid)
-        .collect())
+/// The devices `open` chooses from: `candidates` this process can read.
+fn openable(cfg: &DeviceConfig) -> Result<Vec<nusb::DeviceInfo>, Error> {
+    let ports: Vec<String> = candidates(cfg)?.into_iter().filter(|t| t.ready).map(|t| t.port).collect();
+    Ok(list()?.into_iter().filter(|d| ports.contains(&location(d))).collect())
 }
 
 /// Which of the connected `ports` a panel uses. Its own port if present. Otherwise a port no other
@@ -86,9 +76,9 @@ pub fn select(ports: &[String], want: Option<&str>, taken: &[String]) -> Option<
 
 /// Opens the panel `cfg` describes; `taken` are the ports other panels use.
 pub fn open(cfg: &DeviceConfig, taken: &[String]) -> Result<Panel, Error> {
-    let devices = matching(cfg.vid, cfg.pid)?;
+    let devices = openable(cfg)?;
     let ports: Vec<String> = devices.iter().map(location).collect();
-    let i = select(&ports, cfg.port.as_deref(), taken).ok_or(Error::NotFound { vid: cfg.vid, pid: cfg.pid })?;
+    let i = select(&ports, cfg.port.as_deref(), taken).ok_or_else(|| Error::NotFound(cfg.describe()))?;
     let info = &devices[i];
 
     #[cfg(target_os = "windows")]

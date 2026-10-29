@@ -123,3 +123,21 @@ fn virtual_device_plays_at_recorded_pace_and_stops() {
     drop(dev);
     assert!(stopping.elapsed() < Duration::from_millis(500), "stop took {:?}", stopping.elapsed());
 }
+
+#[test]
+fn report_describes_the_real_descriptor_and_a_capture() {
+    use touch_core::report;
+    let dir = format!("{}/../../captures", env!("CARGO_MANIFEST_DIR"));
+    let fields = report::fields(&std::fs::read(format!("{dir}/report-descriptor.bin")).unwrap()).unwrap();
+    let x = fields.iter().find(|f| f.kind == "Input" && f.usage == "X" && f.application.as_deref() == Some("Touch Screen"));
+    assert!(x.is_some_and(|x| x.logical[1] > 0), "touch X with a range: {x:?}");
+    assert!(fields.iter().any(|f| f.kind == "Feature" && f.usage == "Contact Count Maximum"));
+
+    let rec = Recording::load(format!("{dir}/tap.jsonl").as_ref()).unwrap();
+    let s = report::summarise(&rec, &PanelConfig::default(), "virtual", 8.0, String::new());
+    assert_eq!(s.gestures.get("Tap"), Some(&5));
+    assert_eq!(s.max_contacts, 1);
+    // Taps went to all four corners.
+    let ([x0, x1], [y0, y1]) = (s.x_reached.unwrap(), s.y_reached.unwrap());
+    assert!(x0 < 0.25 && x1 > 0.75 && y0 < 0.25 && y1 > 0.75, "{s:?}");
+}

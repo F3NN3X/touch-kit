@@ -3,8 +3,14 @@
 
 import type { PointerEvent } from "react";
 
-/** Window px per design px; the stage is designed at 1920 wide. */
-export const getScale = (): number => window.innerWidth / 1920;
+let stageZoom = 1;
+
+/** Window px per design px: the zoom the stage picked for this screen (screens/stageLayout.ts). */
+export const getScale = (): number => stageZoom;
+
+export function setStageZoom(zoom: number): void {
+  stageZoom = zoom;
+}
 
 type Handler = (ev: globalThis.PointerEvent) => void;
 

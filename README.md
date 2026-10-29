@@ -1,12 +1,20 @@
-# touch-kit — take the touch panel away from Windows
+# touch-kit — take touch displays away from Windows
 
-Goal: read the touch panel (ILITEK `VID_222A&PID_0001`, display `IPS0001`) directly from
-your own Rust code, so touches never move the cursor, click Windows, or steal focus —
-the behaviour iCUE approximates on the Xeneon Edge, done properly.
+Use a USB touch display — a monitor bar, a panel under the main screen, a small touch screen —
+as its own input surface: touches drive the app on that display and never move the cursor, click
+Windows, or steal focus from what you're doing on the main screen. The behaviour iCUE approximates
+on the Xeneon Edge, done properly, for any USB touchscreen.
 
-How: bind the panel's USB device to **WinUSB** instead of Windows' HID driver.
-Windows then no longer sees a touchscreen at all; the panel app (and `touchprobe`) reads the
-raw HID reports over USB and decides what a touch means.
+How: bind the display's USB touch device to **WinUSB** instead of Windows' HID driver. Windows then
+no longer sees a touchscreen at all; the panel app (and `touchprobe`) reads the raw HID reports over
+USB and decides what a touch means.
+
+**Which displays.** Any USB touchscreen that reports a standard HID Touch Screen collection (Digitizer
+page, usage 0x04) — what every display does for Windows' own touch support. The app finds them by
+that, not by make: it reads each device's report descriptor (field layout, contact count, ranges)
+and, if needed, switches it to multi-touch mode the way Windows does. Developed and tested on an
+ILITEK `222A:0001` panel (1920×550); other displays are expected to work and reports are welcome.
+Pens, touchpads and Bluetooth/I²C touchscreens (most laptops' built-in ones) are out of scope.
 
 ```
 touch-kit/
@@ -26,12 +34,29 @@ touch-kit/
 
 ## Install
 
-1. Download `Touch Panel_<version>_x64-setup.exe` (and `touchprobe.exe` if you want the CLI) from
+1. Download `Touch.Panel_<version>_x64-setup.exe` (and `touchprobe.exe` if you want the CLI) from
    [Releases](https://github.com/F3NN3X/touch-kit/releases). The installer is not code-signed, so
    Windows SmartScreen asks once: **More info → Run anyway**.
 2. Do the [driver setup](docs/driver-setup.md) — the app's Settings → Driver page guides the Zadig
    step too.
-3. Start **Touch Panel**; settings open on first run. The app lives in the tray.
+3. Start **Touch Panel**; settings open on first run. Press **Set up panels…** and tap the circle
+   on each touch display: that binds its touchscreen to its monitor and size. The app lives in the
+   tray.
+
+## Share a display report
+
+Helping support more displays: in the app, **Settings → Report → Create report…** (keep the touch
+recording on and touch the screen as the prompt asks). It saves `touch-kit-report-<date>.json` to
+Downloads, then **Open issue form** takes you to the
+[Display report](https://github.com/F3NN3X/touch-kit/issues/new?template=display-report.yml) form;
+drag the file in.
+
+The report holds the Windows version, monitors and scaling, every touchscreen's USB ids, HID report
+layout (fields, ranges, physical size and units, contact count maximum, other reports such as a
+mouse mode), the app's settings, and a recording of real touches with what the gesture recogniser
+made of it — the recording replays through the same code (`touchprobe replay`), so a display can be
+worked on without having it. No serial numbers, user or computer names. Without the app:
+`touchprobe report --record 15`.
 
 ## Build, run, test
 
@@ -72,11 +97,14 @@ with no panel window open.
 
 **Settings** opens on the main monitor (also with `--settings`, and on first run). Every change is
 validated before it is written — a change that would break the config is refused with the reason —
-and applies live. Per panel: **Pair…** shows "Touch this screen" on the panel's monitor and pins
+and applies live. **Set up panels…** shows a circle on every monitor but the main one, each at a
+different distance from its centre; tapping it on a touch display tells the app which touchscreen
+belongs to which monitor (the distance survives a digitizer mounted rotated or mirrored), and the
+panel takes that monitor and its size. Per panel: **Pair…** shows "Touch this screen" on the panel's monitor and pins
 whichever touch device you touch (by USB port); **Calibrate…** shows four targets on the panel and
 saves the fit after you check its error; **Identify** shows the panel's name on it.
 
-**Driver** (settings page) shows each touch device's driver live. A device Windows still owns gets
+**Driver** (settings page) lists every touchscreen found, of any make, with its driver, live. A device Windows still owns gets
 step-by-step Zadig instructions with the exact USB ID to pick; it turns green by itself when Zadig is
 done. **Uninstall…** gives a device back to Windows after a confirm and one admin prompt, and also
 removes the certificate Zadig added for it. The same script also runs from a shell; see the
@@ -91,7 +119,13 @@ on the main monitor, each playing touches recorded on the real panel (`captures/
 the same pipeline as a USB device — or nothing, for clicking around with the mouse. The real panels
 keep running. Use it to try several panels, rebuilds and gestures without more hardware.
 
+**Any screen size.** The demo stage arranges its five panels for the display: one row on a bar like
+1920 × 550 or 2560 × 720, a grid on 16:9 and portrait screens, pages with dots on small ones. It
+zooms so the panels keep their designed size; try sizes with Testing → Size.
+
 **Dev mode** (General page) lets the real mouse reach the panel windows and opens devtools.
+
+**Report** (settings page) exports the display report above.
 
 **Logs**: `%LOCALAPPDATA%\dev.touchkit.panel\logs\Touch Panel.log` (1 MB per file, last 5 kept).
 Config problems, touch connects/disconnects, webview errors, gesture actions and a latency summary

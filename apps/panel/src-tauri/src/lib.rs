@@ -7,7 +7,9 @@ mod driver;
 mod pairing;
 mod panels;
 mod reload;
+mod report;
 mod settings;
+mod setup;
 mod testing;
 #[cfg(windows)]
 mod win;
@@ -103,6 +105,10 @@ pub fn run() {
             settings::identify,
             pairing::pair_start,
             pairing::pair_cancel,
+            setup::setup_start,
+            setup::setup_finish,
+            report::report_create,
+            report::open_report_issue,
             calibrate::calibrate_start,
             calibrate::calibrate_check,
             calibrate::calibrate_save,
@@ -122,6 +128,7 @@ pub fn run() {
             app.manage(Mutex::new(config::UiConfig::new(&cfg, Vec::new())));
             app.manage(Panels::default());
             app.manage(pairing::Pairing::default());
+            app.manage(setup::Setup::default());
             app.manage(settings::ConfigPath(path.clone()));
             app.manage(Mutex::new(cfg.clone()));
             let mut issues = loaded.issues.clone();

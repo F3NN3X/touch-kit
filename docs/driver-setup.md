@@ -15,30 +15,33 @@ $tp = "..\target\release\touchprobe.exe"   # workspace target dir
 ```
 
 Check:
-- A line for `222a:0001` with `driver=HidUsb` (Windows still owns it) and its `port=`.
-- It is the only device listed with those ids, or you know which `port=` is the panel.
+- A line marked `touchscreen, needs the WinUSB driver`: your display's touch device, with its USB
+  ids (`vvvv:pppp`, e.g. `222a:0001`) and `port=`. Settings → Driver in the app shows the same.
+- With several touch displays, note which ids and port belong to which.
 - The panel's resolution: Windows display settings, or later the monitor list in the panel app's
   Settings → Panels.
 
-**Gate 1:** you know the panel's USB ids and its resolution.
+**Gate 1:** you know the touchscreen's USB ids.
 
 ## Step 2 — Swap the driver to WinUSB (manual, deliberate)
 
 Use Zadig (https://zadig.akeo.ie — the official site only).
 
 1. Run Zadig. **Options → List All Devices**. Untick **Ignore Hubs or Composite Parents**.
-2. In the dropdown pick the entry whose **USB ID reads `222A 0001`**.
+2. In the dropdown pick the entry whose **USB ID matches your touchscreen's ids from step 1**
+   (e.g. `222A 0001`; the Driver page shows them big).
    Double-check the USB ID field — choosing your keyboard or mouse here is the classic mistake.
    If Zadig lists `(Interface N)` entries for it, the device is composite: pick the interface that
    owns the touch collections.
 3. Target driver (right side, after the arrow): **WinUSB**. Click **Replace Driver**.
 4. Windows touch on that monitor stops working. That's the point.
 
-**Gate 2:** `& $tp list` shows `driver=WinUSB` for `222a:0001` (Settings → Driver turns green).
+**Gate 2:** `& $tp list` marks it `touchscreen, ready` (Settings → Driver turns green). Repeat
+steps 1–2 for every touch display.
 
 > Undo at any time: Settings → Driver → **Uninstall…** in the panel app (one admin prompt). Without
 > the app, from an elevated PowerShell in the repo root:
-> `powershell -ExecutionPolicy Bypass -File apps\panel\src-tauri\scripts\uninstall-winusb.ps1 -Vid 222A -ProductId 0001 -Log uninstall.log`
+> `powershell -ExecutionPolicy Bypass -File apps\panel\src-tauri\scripts\uninstall-winusb.ps1 -Vid <vvvv> -ProductId <pppp> -Log uninstall.log`
 > removes the WinUSB binding and Zadig's certificate for this device only.
 > Zadig binds by VID/PID, so the swap survives reboots. If Windows Update ever rebinds the HID
 > driver, just rerun Zadig.
@@ -86,7 +89,8 @@ Untested so far (no Linux machine yet); the code builds for Linux and keeps Wind
 behind `cfg(windows)`.
 
 No driver swap: `touchprobe` detaches the kernel `usbhid` driver while it runs (needs root or a
-udev rule granting your user access to `222a:0001`). The kernel driver reattaches on replug.
+udev rule granting your user access to the touchscreen's `vvvv:pppp`). The kernel driver reattaches
+on replug. Touchscreens are found from `/sys/bus/hid/devices/*/report_descriptor`.
 
 ## Troubleshooting
 

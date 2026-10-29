@@ -5,6 +5,7 @@ import { DriverPage } from "./DriverPage";
 import { GeneralPage } from "./GeneralPage";
 import { GesturesPage } from "./GesturesPage";
 import { PanelsPage } from "./PanelsPage";
+import { ReportPage } from "./ReportPage";
 import { TestingPage } from "./TestingPage";
 
 const PAGES = [
@@ -13,6 +14,7 @@ const PAGES = [
   { id: "gestures", label: "Gestures", Page: GesturesPage },
   { id: "driver", label: "Driver", Page: DriverPage },
   { id: "testing", label: "Testing", Page: TestingPage },
+  { id: "report", label: "Report", Page: ReportPage },
 ] as const;
 
 type PageId = (typeof PAGES)[number]["id"];

@@ -32,7 +32,7 @@ export interface AppConfig {
   prediction_ms: number;
   touch_dots: boolean;
   debug: boolean;
-  testing: { enabled: boolean; virtual_panels: number; replay: string };
+  testing: { enabled: boolean; virtual_panels: number; replay: string; size: [number, number] };
 }
 
 /** JSON as written in the file. */

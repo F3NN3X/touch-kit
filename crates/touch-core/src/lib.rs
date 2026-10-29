@@ -3,11 +3,13 @@
 
 pub mod config;
 pub mod device;
+pub mod discover;
 pub mod gesture;
 pub mod hid;
 pub mod mapper;
 pub mod pipeline;
 pub mod replay;
+pub mod report;
 pub mod touch;
 pub mod usb;
 
@@ -20,8 +22,8 @@ pub use replay::{Pacing, Recording};
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("no USB device {vid:04x}:{pid:04x} found (is the touch USB cable plugged in?)")]
-    NotFound { vid: u16, pid: u16 },
+    #[error("no touch device found for {0} (is the touch USB cable plugged in, and the driver set up?)")]
+    NotFound(String),
     #[error("{0}")]
     Usb(String),
     #[error("device disconnected")]

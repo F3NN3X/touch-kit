@@ -1,5 +1,6 @@
-//! Configuration. Every struct deserialises with defaults for missing fields, and the defaults are
-//! the values measured on the ILITEK 222A:0001 panel (see docs/PLAN.md §1 and §5).
+//! Configuration. Every struct deserialises with defaults for missing fields. Gesture defaults are the
+//! Touch Kit spec; the panel size default is the 1920×550 bar the project started on (docs/PLAN.md §1),
+//! and setup in the app replaces it with the panel's monitor size.
 
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -7,8 +8,10 @@ use std::path::PathBuf;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct DeviceConfig {
-    pub vid: u16,
-    pub pid: u16,
+    /// USB vendor id. `None` (with `pid`): any touchscreen (see `discover`).
+    pub vid: Option<u16>,
+    /// USB product id. `None`: any product of `vid`, or any touchscreen.
+    pub pid: Option<u16>,
     /// Interface number; `None` picks the first HID interface.
     pub iface: Option<u8>,
     /// Device Mode to send on open, if the descriptor has the feature. `None` skips it.
@@ -16,13 +19,32 @@ pub struct DeviceConfig {
     /// Use this report descriptor instead of asking the device.
     pub descriptor_file: Option<PathBuf>,
     /// USB location (`<bus id>-<port chain>`, see `usb::location`) of the device to use, for telling
-    /// identical panels apart (this one has no serial number). `None` takes the first match.
+    /// identical panels apart (many have no serial number). `None` takes the first free match.
     pub port: Option<String>,
 }
 
 impl Default for DeviceConfig {
     fn default() -> Self {
-        Self { vid: 0x222A, pid: 0x0001, iface: None, device_mode: Some(2), descriptor_file: None, port: None }
+        Self { vid: None, pid: None, iface: None, device_mode: Some(2), descriptor_file: None, port: None }
+    }
+}
+
+impl DeviceConfig {
+    /// Whether a device with these ids fits the config's (optional) ids.
+    pub fn accepts(&self, vid: u16, pid: u16) -> bool {
+        self.vid.is_none_or(|v| v == vid) && self.pid.is_none_or(|p| p == pid)
+    }
+
+    /// `222a:0001`, `222a:*` or `any touchscreen`, for messages.
+    pub fn describe(&self) -> String {
+        match (self.vid, self.pid) {
+            (None, None) => "any touchscreen".into(),
+            (v, p) => format!(
+                "{}:{}",
+                v.map_or("*".into(), |v| format!("{v:04x}")),
+                p.map_or("*".into(), |p| format!("{p:04x}"))
+            ),
+        }
     }
 }
 

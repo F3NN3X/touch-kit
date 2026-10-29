@@ -116,7 +116,7 @@ export function StatusStrip() {
         whiteSpace: "nowrap",
       }}
     >
-      <span style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+      <span style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0, flex: "none", maxWidth: "60%" }}>
         <span style={{ width: 6, height: 6, borderRadius: 3, flex: "none", background: DOT[status?.status ?? "Waiting"] }} />
         <span style={{ flex: "none", color: touchColor }}>{statusText(status)}</span>
         {issue && (
@@ -124,7 +124,8 @@ export function StatusStrip() {
         )}
       </span>
       {debug && (
-        <span style={{ color: C.text5 }}>
+        /* Shrinks on narrow screens (ellipsis) so it never runs into the touch status. */
+        <span style={{ color: C.text5, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
           contacts {contacts} · last {last} · {stats} · predict {settings.prediction_ms} ms · tap {g.slop_px}px · hold{" "}
           {g.long_press_ms}ms · dbl {g.double_tap_gap_ms}ms
         </span>

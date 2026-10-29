@@ -1,7 +1,7 @@
 //! Pairing: which USB touch device belongs to which screen, decided by touching the screen.
 //!
 //! The panels stop (pairing needs every candidate device), a "touch this screen" window opens on
-//! the panel's monitor, and every connected WinUSB device with the panel's vid:pid is opened. The
+//! the panel's monitor, and every ready touchscreen the panel's device config accepts is opened. The
 //! first one to report a finger down is written as the panel's `device.port`; the panels then start
 //! again (through the hot reload when the file changed, directly when it didn't).
 
@@ -25,6 +25,12 @@ pub const LABEL: &str = "pair";
 #[derive(Default)]
 pub struct Pairing(Mutex<Option<Arc<AtomicBool>>>);
 
+impl Pairing {
+    pub fn running(&self) -> bool {
+        self.0.lock().unwrap().is_some()
+    }
+}
+
 #[derive(Clone, Serialize)]
 #[serde(tag = "result", rename_all = "snake_case")]
 pub enum PairResult {
@@ -44,20 +50,20 @@ pub async fn pair_start(
     current: State<'_, Mutex<AppConfig>>,
     index: usize,
 ) -> Result<(), String> {
+    if app.state::<crate::setup::Setup>().running() {
+        return Err("setup is running; finish it first".into());
+    }
     let cfg = current.lock().unwrap().clone();
     let entry = cfg.panels.get(index).ok_or("no such panel")?.clone();
     let mon = panels.monitor_of(index).ok_or("this panel has no monitor yet; choose one first")?;
-    let ports: Vec<String> = touch_core::usb::candidates(entry.device.vid, entry.device.pid)
+    let ports: Vec<String> = touch_core::usb::candidates(&entry.device)
         .map_err(|e| e.to_string())?
         .into_iter()
-        .filter(|c| c.driver.as_deref().is_none_or(|d| d.eq_ignore_ascii_case("winusb")))
+        .filter(|c| c.ready)
         .map(|c| c.port)
         .collect();
     if ports.is_empty() {
-        return Err(format!(
-            "no {:04x}:{:04x} device with the WinUSB driver is connected (see Driver)",
-            entry.device.vid, entry.device.pid
-        ));
+        return Err(format!("no touch device ({}) is ready to use; see the Driver page", entry.device.describe()));
     }
     let cancel = Arc::new(AtomicBool::new(false));
     {

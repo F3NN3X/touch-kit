@@ -1,0 +1,42 @@
+name: Display report
+description: Share a touch display's report so it can be supported in other apps.
+title: "Display report: "
+labels: ["display report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks! Create the report in the Touch Panel app: **Settings → Report → Create report…**
+        (keep "Include a touch recording" on and touch the screen as the prompt says). It is saved to
+        your Downloads folder as `touch-kit-report-<date>.json`. It holds no serial numbers, user or
+        computer names.
+  - type: input
+    id: display
+    attributes:
+      label: Display
+      description: Make and model of the touch display, and where it sits (e.g. "Corsair Xeneon Edge, below the main monitor").
+    validations:
+      required: true
+  - type: dropdown
+    id: works
+    attributes:
+      label: Does touch work in the Touch Panel app?
+      options:
+        - "Yes, everything"
+        - "Partly (describe below)"
+        - "No"
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Report file
+      description: Drag the `touch-kit-report-….json` file into this box.
+      placeholder: Drop the report file here.
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Anything odd — touches landing in the wrong place, gestures not recognised, setup trouble.

@@ -5,6 +5,37 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-29
+
+Any USB touchscreen, one-touch setup, display reports, and a panel UI for any screen size.
+
+### Added
+
+- **Any USB touchscreen**: devices are found by their HID Touch Screen collection instead of a fixed
+  vid:pid — on Windows through SetupAPI while Windows still owns them, and by their WinUSB binding
+  after the driver swap; on Linux from sysfs. `device.vid`/`device.pid` are optional; unset means any
+  touchscreen.
+- **Set up panels** (settings → Panels): a circle on every monitor but the main one, each at a
+  different distance from its centre; one tap per touch display binds its touchscreen, monitor and
+  size, for any number of panels at once, and works with digitizers mounted rotated or mirrored.
+- The Driver page lists every touchscreen found, with Zadig steps for each one's own USB ids.
+- `touchprobe list` marks touchscreens and whether they're ready; `--vid`/`--pid` are optional.
+- **Display report** (settings → Report, `touchprobe report`): one JSON file with the OS, monitors
+  and scaling, each touchscreen's USB and HID details (fields with physical ranges and units, touch
+  layout, contact count maximum, other reports), the app config, and optionally a recording of real
+  touches with derived stats, in replayable `touchprobe record` format. No serials or user names.
+  A GitHub issue form takes the file.
+
+- The panel UI fits any display size: one row on bars, a grid on 16:9 and portrait screens, pages
+  with tappable dots on small ones; the stage zooms so panels keep their designed size and touch
+  targets stay at the 44 px floor where the screen allows it (screens under ~560 px tall get ~42 px).
+- `testing.size` (Settings → Testing → Size): virtual panels at other displays' resolutions.
+
+### Changed
+
+- The "no monitor" warning points to Set up panels.
+- The debug strip truncates on narrow screens instead of overlapping the touch status.
+
 ## [1.0.0] - 2026-10-29
 
 First public release: the panel app as a Windows installer, plus `touchprobe`.
@@ -60,5 +91,6 @@ First public release: the panel app as a Windows installer, plus `touchprobe`.
 - Identify and calibration reached every panel window instead of only the one asked.
 - The settings calibration hint stayed on "tap the targets" after calibrating.
 
-[Unreleased]: https://github.com/F3NN3X/touch-kit/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/F3NN3X/touch-kit/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/F3NN3X/touch-kit/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/F3NN3X/touch-kit/releases/tag/v1.0.0

@@ -511,6 +511,56 @@ Built as planned (`driver.rs`, `settings/DriverPage.tsx`, `src-tauri/scripts/uni
     Identify and Calibrate reached every panel. Panel-targeted events are listened to with
     `getCurrentWebviewWindow().listen`; any new one must be too.
 
+### 5g. Any touchscreen, one-touch setup (built)
+
+- **What counts:** a USB device with a HID Touch Screen application collection (0x000D_0004), the
+  collection every touchscreen exposes for the OS. Decoding was already descriptor-driven
+  (hidreport), and Contact Count Maximum / Device Mode are standard features, so only discovery and
+  defaults were tied to the ILITEK panel.
+- **Discovery** (`touch-core/src/discover.rs`): Windows, before the swap: SetupAPI over the `HID`
+  enumerator for hardware id `HID_DEVICE_UP:000D_U:0004`, walking up (past a composite `&MI_xx`
+  node) to the USB device, matched to nusb by instance id — checked against this machine's mice in
+  an ignored test. After the swap the collections are gone, so a WinUSB device with a HID-class
+  interface counts and `open` confirms it from the descriptor. Linux: `/sys/bus/hid/devices/*/
+  report_descriptor` parsed with the same code, matched to the USB device by sysfs path; untested.
+  Unrelated devices are never opened: on Windows only WinUSB-bound HID-class devices, on Linux only
+  devices with a touch descriptor.
+- `DeviceConfig.vid`/`pid` are `Option`; `None` = any touchscreen. Explicit ids keep the old
+  behaviour (every device with them). Existing configs parse unchanged.
+- **One-touch setup** (`src-tauri/src/setup.rs`): targets on every non-main monitor (at most 5) at
+  radii 0…0.4 from the centre; probes on every ready touchscreen map touches to fractions; a Down
+  binds (device, monitor) by nearest free radius within half the spacing. Radius is invariant under
+  the 8 rotations/flips of the unit square, so it works before calibration. Bindings go to the panel
+  with that port, else on that monitor, else the blank default panel, else a new one; other panels
+  let go of the port/monitor; the file gets port, monitor name and the monitor's size.
+- The demo stage fits any display (`screens/stageLayout.ts`): candidate arrangements (5 in a row,
+  3+2, 2+2+1, a column) and paged ones (k panels per page, side by side, stacked or 2×2) are scored
+  by the zoom at which they fit with every panel at least its bar size (widths 340/330/410/400/328,
+  height 502). The best full arrangement wins if its zoom keeps 52 px targets ≥ 44 px (0.846);
+  else the most panels per page that do; else the largest zoom. The stage applies it with CSS
+  `zoom`, and `getScale()` (drag maths) returns it. Checked with virtual panels at 1920×550,
+  2560×720, 1920×1080, 1280×800, 1024×600, 800×480 and 720×1280 (`testing.size`). Screens under
+  ~560 px tall can't keep 44 px targets (panels are 502 tall).
+
+### 5h. Display report (built)
+
+- Purpose: users of other displays send what's needed to support them elsewhere, without us having
+  the hardware. `touch-core/src/report.rs` builds the device part (also `touchprobe report`); the
+  app's `report.rs` adds OS, monitors with scale factor and the config, stops the panels, opens each
+  ready touchscreen, optionally records all of them at once behind a prompt window per panel, and
+  saves `touch-kit-report-<utc>.json` to Downloads. `report_version` 1.
+- Per touchscreen: ids, USB version/speed, interface/endpoint/packet size, the raw descriptor (hex),
+  report lengths, a touch summary (slots, contact count/scan time/confidence/size fields, X/Y logical
+  and physical range, unit, size in mm), Contact Count Maximum as read, Device Mode feature, other
+  input applications (mouse mode, vendor), and every field with physical range and unit (re-parsed
+  with hidreport; `hid::Field` drops those).
+- Recording: raw reports in `touchprobe record` format plus stats from the pipeline mapped like the
+  panel that uses the device (gesture thresholds are in panel px): rate, most fingers at once, x/y
+  extent reached as fractions, gesture counts, non-touch report ids.
+- Seen on the ILITEK panel: the descriptor claims 309 × 174 mm, which isn't this bar: firmware
+  physical sizes can't be trusted blindly.
+- Privacy: no serial (only `has_serial`), no user/computer names; the USB port path is topology only.
+
 ### Gates
 
 - **Gate 5.1** after 5a + 5b (passed): tests unchanged and green; one panel works as before from a

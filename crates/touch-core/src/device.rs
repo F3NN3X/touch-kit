@@ -125,7 +125,7 @@ fn run(mut cfg: Config, taken: Vec<String>, tx: Sender<DeviceMsg>, ctrl: Receive
                 }
                 Exit::Error(message) => report(Status::Error { message }, &mut last),
             },
-            Err(Error::NotFound { .. }) => report(Status::Disconnected, &mut last),
+            Err(Error::NotFound(_)) => report(Status::Disconnected, &mut last),
             Err(e) => report(Status::Error { message: e.to_string() }, &mut last),
         };
         if !alive {
@@ -133,7 +133,7 @@ fn run(mut cfg: Config, taken: Vec<String>, tx: Sender<DeviceMsg>, ctrl: Receive
         }
         let until = Instant::now() + RECONNECT_POLL;
         while Instant::now() < until {
-            if watch.as_mut().is_some_and(|w| arrived(w, cfg.device.vid, cfg.device.pid)) {
+            if watch.as_mut().is_some_and(|w| arrived(w, &cfg.device)) {
                 break;
             }
             match ctrl.recv_timeout(WAIT_SLICE) {
@@ -148,13 +148,13 @@ fn run(mut cfg: Config, taken: Vec<String>, tx: Sender<DeviceMsg>, ctrl: Receive
     }
 }
 
-/// Drains queued hotplug events; true if the panel was among the arrivals.
-fn arrived(watch: &mut HotplugWatch, vid: u16, pid: u16) -> bool {
+/// Drains queued hotplug events; true if a device the config accepts was among the arrivals.
+fn arrived(watch: &mut HotplugWatch, want: &crate::DeviceConfig) -> bool {
     let mut cx = Context::from_waker(Waker::noop());
     let mut seen = false;
     while let Poll::Ready(Some(ev)) = Pin::new(&mut *watch).poll_next(&mut cx) {
         if let HotplugEvent::Connected(d) = ev {
-            seen |= d.vendor_id() == vid && d.product_id() == pid;
+            seen |= want.accepts(d.vendor_id(), d.product_id());
         }
     }
     seen
