@@ -21,20 +21,20 @@ Pens, touchpads and Bluetooth/I²C touchscreens (most laptops' built-in ones) ar
 
 ```
 touch-kit/
-  crates/touch-core/     library: USB, HID decode, contact tracking, mapping, gestures, replay
-  crates/touch-ffi/      C ABI over touch-core (touch_kit.dll + include/touch_kit.h)
-  crates/touch-kit-tauri/  Tauri glue: never-activating window, Channel bridge to the webview
-  packages/touch-kit-web/  webview half: touch-core messages as DOM pointer events + gestures
-  bindings/dotnet/       C# wrapper (TouchKit.dll) and a console sample
-  apps/panel/            Tauri v2 app: no-activate window on the panel, React UI kit
-    src-tauri/           Rust side: panels, config + hot reload, settings, pairing, calibration,
-                         driver, testing mode, touch → webview bridge
-    src/                 webview: kit/, screens/, settings/ (touch input via @touch-kit/web)
-  touchprobe/            Rust CLI over touch-core: list / info / raw / record / touch /
-                         gestures / replay / set-mode / get-feature
-  captures/              recorded reports + report descriptor; the test fixtures
-  docs/                  PLAN.md (device facts, design, thresholds, risks), config.md,
-                         driver-setup.md
+  crates/touch-core/        library: USB, HID decode, contact tracking, mapping, gestures, replay
+  crates/touch-ffi/         C ABI over touch-core (touch_kit.dll + include/touch_kit.h)
+  crates/touch-kit-tauri/   Tauri glue: never-activating window, Channel bridge to the webview
+  packages/touch-kit-web/   webview half: touch-core messages as DOM pointer events + gestures
+  bindings/dotnet/          C# wrapper (TouchKit.dll) and a console sample
+  apps/panel/               Tauri v2 app: the panels, settings, setup, and a React UI kit
+    src-tauri/              Rust side: panels, config + hot reload, settings, setup, pairing,
+                            calibration, driver, testing mode, display report
+    src/                    webview: kit/, screens/, settings/ (touch input via @touch-kit/web)
+  touchprobe/               Rust CLI over touch-core: list / info / raw / record / touch /
+                            gestures / replay / report / set-mode / get-feature
+  captures/                 recorded reports + report descriptor; the test fixtures
+  docs/                     PLAN.md (device facts, design, thresholds, risks), config.md,
+                            driver-setup.md, integrating.md
   CHANGELOG.md
 ```
 
@@ -48,6 +48,9 @@ touch-kit/
 3. Start **Touch Panel**; settings open on first run. Press **Set up panels…** and tap the circle
    on each touch display: that binds its touchscreen to its monitor and size. The app lives in the
    tray.
+
+Building your own app on touch-kit? Each release also has `touch_kit.dll`, `touch_kit.h` and
+`TouchKit.dll`; see [docs/integrating.md](docs/integrating.md).
 
 ## Share a display report
 
@@ -67,10 +70,12 @@ worked on without having it. No serial numbers, user or computer names. Without 
 ## Build, run, test
 
 Needs Rust (stable), Node 20+, pnpm, and on Windows the WebView2 runtime (ships with Windows 11).
+The .NET wrapper also needs the .NET 8 SDK.
 
 ```powershell
 cargo test --workspace                           # no hardware needed: replays captures/
 cargo clippy --workspace --all-targets -- -D warnings
+cargo fmt --all --check                          # rustfmt.toml: width 130
 
 pnpm install                                     # the whole workspace, from the repo root
 pnpm -r typecheck; pnpm -r test                  # tsc, Vitest (app and @touch-kit/web)
@@ -79,6 +84,10 @@ pnpm tauri dev                                   # run the panel app
 
 cargo run -p touchprobe -- gestures              # live gestures in the terminal
 cargo run -p touchprobe -- replay ..\..\captures\swipes.jsonl --instant
+cd ..\..
+
+cargo build --release -p touch-ffi               # touch_kit.dll, for the .NET wrapper
+dotnet run --project bindings\dotnet\TouchKit.Sample -- captures\tap.jsonl
 ```
 
 Close the panel app before `touchprobe` talks to the device: only one process can claim the interface.
@@ -86,13 +95,20 @@ Close the panel app before `touchprobe` talks to the device: only one process ca
 `pnpm tauri build` (in `apps\panel`) builds the Windows installer into
 `target\release\bundle\nsis\`.
 
+**CI** (`.github/workflows/ci.yml`) runs the format check, clippy, the Rust and frontend tests, and
+builds of the app and libraries on every push to `main` and every pull request.
+
 ### Releasing
 
 Bump the version in `apps/panel/src-tauri/tauri.conf.json`, the two `package.json` files
 (`apps/panel`, `packages/touch-kit-web`), `bindings/dotnet/TouchKit/TouchKit.csproj` and the five
-`Cargo.toml` files (`.github/scripts/check-version.ps1` lists them), move the changelog's Unreleased entries under the new version, commit, then push a
-tag: `git tag v1.2.3 && git push origin v1.2.3`. The **Release** workflow tests, builds the installer,
-`touchprobe.exe` and the libraries (`touch_kit.dll`, `touch_kit.h`, `TouchKit.dll`), and publishes a GitHub Release with that version's changelog section as notes.
+`Cargo.toml` files (`.github/scripts/check-version.ps1` lists them), and the `v<version>` install
+lines in `docs/integrating.md`; run `cargo update -w`; move the changelog's Unreleased entries under
+the new version; commit, then push an annotated tag:
+`git tag -a v1.2.3 -m "touch-kit 1.2.3" && git push origin v1.2.3`. The **Release** workflow checks
+that every version matches the tag, tests, builds the installer, `touchprobe.exe` and the libraries
+(`touch_kit.dll`, `touch_kit.h`, `TouchKit.dll`), and publishes a GitHub Release with that version's
+changelog section as notes.
 
 ## The panel app
 
@@ -107,17 +123,19 @@ validated before it is written — a change that would break the config is refus
 and applies live. **Set up panels…** shows a circle on every monitor but the main one, each at a
 different distance from its centre; tapping it on a touch display tells the app which touchscreen
 belongs to which monitor (the distance survives a digitizer mounted rotated or mirrored), and the
-panel takes that monitor and its size. Per panel: **Pair…** shows "Touch this screen" on the panel's monitor and pins
-whichever touch device you touch (by USB port); **Calibrate…** shows four targets on the panel and
-saves the fit after you check its error; **Identify** shows the panel's name on it.
+panel takes that monitor and its size; running it again later is safe. Per panel: **Pair…** shows
+"Touch this screen" on the panel's monitor and pins whichever touch device you touch (by USB port);
+**Calibrate…** shows four targets on the panel and saves the fit after you check its error;
+**Identify** shows the panel's name on it.
 
-**Driver** (settings page) lists every touchscreen found, of any make, with its driver, live. A device Windows still owns gets
-step-by-step Zadig instructions with the exact USB ID to pick; it turns green by itself when Zadig is
-done. **Uninstall…** gives a device back to Windows after a confirm and one admin prompt, and also
-removes the certificate Zadig added for it. The same script also runs from a shell; see the
-driver setup.
+**Driver** (settings page) lists every touchscreen found, of any make, with its driver, live. A
+device Windows still owns gets step-by-step Zadig instructions with the exact USB ID to pick; it
+turns green by itself when Zadig is done, and its panel connects without a restart.
+**Uninstall…** gives a device back to Windows after a confirm and one admin prompt, and also removes
+the certificate Zadig added for it. The same script also runs from a shell; see the driver setup.
 
-**Status strip** (bottom edge): touch connection state, always; the first config problem or
+**Status strip** (bottom edge): touch connection state, always (including "<touchscreen> found, but
+Windows still owns it" while the driver step is still to do); the first config problem or
 webview error, when there is one; latency and thresholds when debug is on (three-finger tap).
 A panel that fails to render shows its error in its own place; the others keep working.
 

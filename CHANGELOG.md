@@ -7,11 +7,16 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [1.2.1] - 2026-10-29
 
+Clearer driver status, a setup fix, and CI on every push.
+
 ### Changed
 
 - A touchscreen that is plugged in but still on its Windows driver now reports an error naming it
   ("<product> found, but Windows still owns it: switch its driver to WinUSB") instead of
   `Disconnected`, in the app's status strip and through every binding.
+- CI (`.github/workflows/ci.yml`) checks formatting, lint, tests and builds on every push to `main`
+  and every pull request, not only on release tags; releases check formatting too.
+- The Rust code follows a `rustfmt.toml` (width 130), reformatted once.
 
 ### Fixed
 
