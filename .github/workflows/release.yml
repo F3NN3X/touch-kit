@@ -1,6 +1,6 @@
 # Pushing a tag `v<version>` tests the workspace, builds the Windows installer and touchprobe.exe,
 # and publishes a GitHub Release whose notes are that version's CHANGELOG.md section.
-# The release stays a draft until every asset is uploaded, so a failed build never publishes.
+# Everything is built before the release is created, so a failed build never publishes.
 #
 # Actions are pinned to commit SHAs (tag in the comment): this job can write to the repo, so a
 # moved tag must not change what runs. Dependabot (.github/dependabot.yml) proposes updates.
@@ -58,41 +58,29 @@ jobs:
           pnpm typecheck
           pnpm test
 
-      - name: Create draft release
-        id: draft
+      - name: Build installer and touchprobe
+        shell: pwsh
+        run: |
+          Push-Location apps/panel
+          pnpm tauri build
+          if ($LASTEXITCODE -ne 0) { throw "tauri build failed" }
+          Pop-Location
+          cargo build --release -p touchprobe
+          if ($LASTEXITCODE -ne 0) { throw "touchprobe build failed" }
+
+      # Only this step holds the token, and it runs after every build has succeeded.
+      - name: Publish release
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./.github/scripts/release-notes.ps1 -Tag $env:TAG -Out release-notes.md
-          # A re-run reuses the draft an earlier attempt created.
-          gh release view $env:TAG --json databaseId 2>$null | Out-Null
-          if ($LASTEXITCODE -ne 0) {
-            gh release create $env:TAG --draft --title "Touch Panel $env:TAG" --notes-file release-notes.md
-            if ($LASTEXITCODE -ne 0) { throw "creating the release failed" }
+          $assets = @((Get-ChildItem target/release/bundle/nsis/*-setup.exe).FullName) + 'target/release/touchprobe.exe'
+          gh release view $env:TAG --json tagName 2>$null | Out-Null
+          if ($LASTEXITCODE -eq 0) {
+            # A re-run after a failed upload: replace the assets, keep the release.
+            gh release upload $env:TAG @assets --clobber
+          } else {
+            gh release create $env:TAG @assets --title "Touch Panel $env:TAG" --notes-file release-notes.md
           }
-          $id = gh release view $env:TAG --json databaseId --jq .databaseId
-          if (-not $id) { throw "no release id for $env:TAG" }
-          "id=$id" >> $env:GITHUB_OUTPUT
-
-      - name: Build installer
-        uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0.6.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          projectPath: apps/panel
-          tauriScript: pnpm tauri
-          releaseId: ${{ steps.draft.outputs.id }}
-
-      - name: Build and upload touchprobe
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          cargo build --release -p touchprobe
-          gh release upload $env:TAG target/release/touchprobe.exe --clobber
-
-      - name: Publish release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release edit $env:TAG --draft=false
+          if ($LASTEXITCODE -ne 0) { throw "publishing the release failed" }
