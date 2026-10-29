@@ -58,6 +58,14 @@ fn identity(p: &PanelEntry) -> (&str, &touch_core::DeviceConfig, &Option<crate::
     (&p.name, &p.device, &p.monitor)
 }
 
+/// Whether going from `old` to `new` rebuilds the panels (else they are reconfigured in place).
+pub fn rebuilds(old: &AppConfig, new: &AppConfig) -> bool {
+    old.panels.len() != new.panels.len()
+        || old.panels.iter().zip(&new.panels).any(|(a, b)| identity(a) != identity(b))
+        || old.dev_mode != new.dev_mode
+        || old.testing != new.testing
+}
+
 impl Panels {
     /// Starts every panel in `cfg`. Problems (no monitor, no windows) come back as issues.
     pub fn start(&self, app: &AppHandle, cfg: &AppConfig) -> Vec<Issue> {
@@ -86,11 +94,7 @@ impl Panels {
 
     /// Applies a reloaded config: rebuilds on a panel list change, else reconfigures in place.
     pub fn apply(&self, app: &AppHandle, old: &AppConfig, new: &AppConfig) -> Vec<Issue> {
-        let rebuild = old.panels.len() != new.panels.len()
-            || old.panels.iter().zip(&new.panels).any(|(a, b)| identity(a) != identity(b))
-            || old.dev_mode != new.dev_mode
-            || old.testing != new.testing;
-        if rebuild {
+        if rebuilds(old, new) {
             self.stop();
             return self.start(app, new);
         }

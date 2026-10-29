@@ -278,14 +278,20 @@ fn finish(app: &AppHandle, cfg: &AppConfig, bindings: &[(String, MonitorInfo)]) 
                 app.state::<Panels>().start(app, cfg);
                 SetupResult::Failed { message: "the config file can't be read; fix it first".into() }
             }
-            // The file changes, so the hot reload rebuilds the panels.
             Some(file) => match edit_config(&path, &[("panels", Some(Value::Array(apply(file, &cfg.panels, bindings))))]) {
-                Ok(()) => SetupResult::Done {
-                    bound: bindings
-                        .iter()
-                        .map(|(port, m)| Bound { port: port.clone(), monitor: m.name.clone().unwrap_or_default() })
-                        .collect(),
-                },
+                Ok(()) => {
+                    // The hot reload rebuilds the panels only when a panel's device, monitor or name
+                    // changed; re-binding the same ones leaves them stopped, so start them here then.
+                    if let Some(next) = crate::config::load(&path).config.filter(|next| !crate::panels::rebuilds(cfg, next)) {
+                        app.state::<Panels>().start(app, &next);
+                    }
+                    SetupResult::Done {
+                        bound: bindings
+                            .iter()
+                            .map(|(port, m)| Bound { port: port.clone(), monitor: m.name.clone().unwrap_or_default() })
+                            .collect(),
+                    }
+                }
                 Err(e) => {
                     app.state::<Panels>().start(app, cfg);
                     SetupResult::Failed { message: e.join("; ") }
