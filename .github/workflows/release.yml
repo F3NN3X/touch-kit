@@ -35,7 +35,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
           toolchain: stable
-          components: clippy
+          components: clippy, rustfmt
 
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
 
@@ -46,8 +46,9 @@ jobs:
         shell: pwsh
         run: ./.github/scripts/check-version.ps1 -Tag $env:TAG
 
-      - name: Lint and test
+      - name: Format, lint and test
         run: |
+          cargo fmt --all --check
           cargo clippy --workspace --all-targets -- -D warnings
           cargo test --workspace
 
