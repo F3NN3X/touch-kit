@@ -1,6 +1,6 @@
 [package]
 name = "touch-core"
-version = "1.1.1"
+version = "1.2.0"
 edition = "2021"
 description = "Raw USB HID touch input: device access, frame decoding, mapping and gesture recognition"
 license = "MIT"

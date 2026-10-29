@@ -5,6 +5,10 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-29
+
+The touch engine as libraries for other apps: Rust, .NET, C and Tauri.
+
 ### Added
 
 - **Use touch-kit in your own app** ([docs/integrating.md](docs/integrating.md)):
@@ -115,7 +119,8 @@ First public release: the panel app as a Windows installer, plus `touchprobe`.
 - Identify and calibration reached every panel window instead of only the one asked.
 - The settings calibration hint stayed on "tap the targets" after calibrating.
 
-[Unreleased]: https://github.com/F3NN3X/touch-kit/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/F3NN3X/touch-kit/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/F3NN3X/touch-kit/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/F3NN3X/touch-kit/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/F3NN3X/touch-kit/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/F3NN3X/touch-kit/releases/tag/v1.0.0
