@@ -4,7 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useCallback, useEffect, useState } from "react";
 import type { ConfigIssue, UiConfig } from "../touch/settings";
-import type { Status } from "../touch/types";
+import type { Status } from "@touch-kit/web";
 
 export interface MonitorMatch {
   name?: string | null;

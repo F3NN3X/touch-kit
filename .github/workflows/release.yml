@@ -24,13 +24,13 @@ jobs:
 
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
-          package_json_file: apps/panel/package.json
+          package_json_file: package.json
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
           cache: pnpm
-          cache-dependency-path: apps/panel/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
@@ -40,7 +40,6 @@ jobs:
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
 
       - name: Install frontend dependencies
-        working-directory: apps/panel
         run: pnpm install --frozen-lockfile
 
       - name: Version matches the tag
@@ -53,20 +52,21 @@ jobs:
           cargo test --workspace
 
       - name: Test frontend
-        working-directory: apps/panel
         run: |
-          pnpm typecheck
-          pnpm test
+          pnpm -r typecheck
+          pnpm -r test
 
-      - name: Build installer and touchprobe
+      - name: Build installer, touchprobe and the libraries
         shell: pwsh
         run: |
           Push-Location apps/panel
           pnpm tauri build
           if ($LASTEXITCODE -ne 0) { throw "tauri build failed" }
           Pop-Location
-          cargo build --release -p touchprobe
-          if ($LASTEXITCODE -ne 0) { throw "touchprobe build failed" }
+          cargo build --release -p touchprobe -p touch-ffi
+          if ($LASTEXITCODE -ne 0) { throw "touchprobe / touch-ffi build failed" }
+          dotnet build bindings/dotnet/TouchKit -c Release
+          if ($LASTEXITCODE -ne 0) { throw "TouchKit build failed" }
 
       # Only this step holds the token, and it runs after every build has succeeded.
       - name: Publish release
@@ -75,7 +75,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./.github/scripts/release-notes.ps1 -Tag $env:TAG -Out release-notes.md
-          $assets = @((Get-ChildItem target/release/bundle/nsis/*-setup.exe).FullName) + 'target/release/touchprobe.exe'
+          $assets = @((Get-ChildItem target/release/bundle/nsis/*-setup.exe).FullName) + @(
+            'target/release/touchprobe.exe',
+            'target/release/touch_kit.dll',
+            'crates/touch-ffi/include/touch_kit.h',
+            'bindings/dotnet/TouchKit/bin/Release/net8.0/TouchKit.dll')
           gh release view $env:TAG --json tagName 2>$null | Out-Null
           if ($LASTEXITCODE -eq 0) {
             # A re-run after a failed upload: replace the assets, keep the release.

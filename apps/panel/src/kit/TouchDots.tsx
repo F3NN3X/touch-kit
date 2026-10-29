@@ -3,7 +3,7 @@ import { drawPositions, onDeviceMessage } from "../touch/bridge";
 import { useDebugVisible } from "../touch/actions";
 import { recordFrameInterval } from "../touch/latency";
 import { useSettings } from "../touch/settings";
-import { isStatus } from "../touch/types";
+import { isStatus } from "@touch-kit/web";
 
 const DOT = 48;
 

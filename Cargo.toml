@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/touch-core", "touchprobe", "apps/panel/src-tauri"]
+members = ["crates/touch-core", "crates/touch-ffi", "crates/touch-kit-tauri", "touchprobe", "apps/panel/src-tauri"]
 
 [workspace.dependencies]
 nusb = "0.2.9"

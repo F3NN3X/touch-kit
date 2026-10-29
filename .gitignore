@@ -2,3 +2,5 @@ target/
 node_modules/
 dist/
 apps/panel/src-tauri/gen/
+bindings/dotnet/**/bin/
+bindings/dotnet/**/obj/

@@ -1,0 +1,21 @@
+{
+  "name": "@touch-kit/web",
+  "version": "1.1.1",
+  "description": "Webview half of touch-kit: touch-core messages from a Tauri Channel as DOM pointer events and gestures",
+  "license": "MIT",
+  "type": "module",
+  "exports": "./src/index.ts",
+  "files": ["src", "!src/**/*.test.ts"],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@tauri-apps/api": "^2"
+  },
+  "devDependencies": {
+    "@tauri-apps/api": "^2.12.4",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

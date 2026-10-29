@@ -5,6 +5,22 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Use touch-kit in your own app** ([docs/integrating.md](docs/integrating.md)):
+  - `touch-ffi`: a C ABI over touch-core, built as `touch_kit.dll`, with `touch_kit.h`.
+  - `TouchKit.dll`: a .NET 8 wrapper (events on the UI thread, a never-activating window helper for
+    WPF and WinForms) and a console sample.
+  - `touch-kit-tauri`: the app's never-activating window and webview bridge, as a crate.
+  - `@touch-kit/web`: the app's DOM touch bridge, as a package.
+  - A `print_touches` example for touch-core.
+  - Releases attach `touch_kit.dll`, `touch_kit.h` and `TouchKit.dll`.
+
+### Changed
+
+- The frontend is a pnpm workspace at the repository root (`pnpm-lock.yaml` moved there); the app
+  uses `touch-kit-tauri` and `@touch-kit/web` itself.
+
 ## [1.1.1] - 2026-10-29
 
 ### Fixed

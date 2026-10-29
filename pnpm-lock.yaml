@@ -6,7 +6,9 @@ settings:
 
 importers:
 
-  .:
+  .: {}
+
+  apps/panel:
     dependencies:
       '@fontsource-variable/geist':
         specifier: ^5.3.0
@@ -17,6 +19,9 @@ importers:
       '@tauri-apps/api':
         specifier: ^2.12.4
         version: 2.12.4
+      '@touch-kit/web':
+        specifier: workspace:*
+        version: link:../../packages/touch-kit-web
       material-symbols:
         specifier: ^0.48.2
         version: 0.48.2
@@ -51,6 +56,18 @@ importers:
       vite:
         specifier: ^8.3.5
         version: 8.3.5(jiti@2.7.0)
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(vite@8.3.5(jiti@2.7.0))
+
+  packages/touch-kit-web:
+    devDependencies:
+      '@tauri-apps/api':
+        specifier: ^2.12.4
+        version: 2.12.4
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
       vitest:
         specifier: ^5.0.5
         version: 5.0.5(vite@8.3.5(jiti@2.7.0))

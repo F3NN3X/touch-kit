@@ -1,4 +1,4 @@
-//! Creates a panel window on its monitor without ever activating it.
+//! Creates panel windows on their monitor; the never-activating window itself is `touch_kit_tauri::window`.
 
 use crate::config::PanelEntry;
 use tauri::{AppHandle, PhysicalPosition, PhysicalSize, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
@@ -38,15 +38,8 @@ pub fn monitors(app: &AppHandle) -> anyhow::Result<Vec<MonitorInfo>> {
 
 /// `route`: the page's hash (`""` for the panel UI, `"#pair/<name>"` for pairing).
 pub fn create(app: &AppHandle, label: &str, mon: &MonitorInfo, dev_mode: bool, route: &str) -> anyhow::Result<WebviewWindow> {
-    let win = WebviewWindowBuilder::new(app, label, WebviewUrl::App(format!("index.html{route}").into()))
+    let win = touch_kit_tauri::window::builder(app, label, WebviewUrl::App(format!("index.html{route}").into()))
         .title("Touch panel")
-        .visible(false)
-        .focused(false)
-        .focusable(false)
-        .decorations(false)
-        .resizable(false)
-        .skip_taskbar(true)
-        .shadow(false)
         .build()?;
     win.set_position(PhysicalPosition::new(mon.position[0], mon.position[1]))?;
     win.set_size(PhysicalSize::new(mon.size[0], mon.size[1]))?;
@@ -56,7 +49,7 @@ pub fn create(app: &AppHandle, label: &str, mon: &MonitorInfo, dev_mode: bool, r
         // Touch arrives from touch-core; the real mouse must never land on this window.
         win.set_ignore_cursor_events(true)?;
     }
-    show(&win)?;
+    touch_kit_tauri::window::show(&win)?;
     Ok(win)
 }
 
@@ -72,17 +65,6 @@ pub fn create_virtual(app: &AppHandle, label: &str, title: &str, spot: &MonitorI
     win.set_size(PhysicalSize::new(spot.size[0], spot.size[1]))?;
     win.show()?;
     Ok(win)
-}
-
-#[cfg(windows)]
-fn show(win: &WebviewWindow) -> anyhow::Result<()> {
-    crate::win::show_without_activating(win.hwnd()?);
-    Ok(())
-}
-
-#[cfg(not(windows))]
-fn show(win: &WebviewWindow) -> anyhow::Result<()> {
-    Ok(win.show()?)
 }
 
 #[cfg(test)]

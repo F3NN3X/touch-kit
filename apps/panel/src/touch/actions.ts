@@ -5,7 +5,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { useSyncExternalStore } from "react";
 import { onDeviceMessage } from "./bridge";
 import { getSettings, type Action } from "./settings";
-import type { Gesture } from "./types";
+import type { Gesture } from "@touch-kit/web";
 
 /** Config key for a gesture: `Tap`, `LongPress`, `Swipe Left x2`, `ThreeFingerTap`, ... */
 export function gestureKey(g: Gesture): string {

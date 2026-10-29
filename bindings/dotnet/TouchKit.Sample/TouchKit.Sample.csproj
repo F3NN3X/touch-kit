@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Built by cargo build (release, package touch-ffi); a release download has it next to TouchKit.dll. -->
+    <TouchKitNative Condition="'$(TouchKitNative)' == ''">$(MSBuildThisFileDirectory)..\..\..\target\release\touch_kit.dll</TouchKitNative>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TouchKit\TouchKit.csproj" />
+    <None Include="$(TouchKitNative)" Condition="Exists('$(TouchKitNative)')" Link="touch_kit.dll" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

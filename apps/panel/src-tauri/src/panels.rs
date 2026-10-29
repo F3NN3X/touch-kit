@@ -3,7 +3,7 @@
 //! A change to the panel list (count, name, device, monitor) rebuilds all of them; geometry and
 //! gesture threshold changes are applied to the running devices in place.
 
-use crate::bridge::{Bridge, UiMsg};
+use touch_kit_tauri::{Bridge, UiMsg};
 use crate::config::{AppConfig, Issue, PanelEntry};
 use crate::testing;
 use crate::window::{self, MonitorInfo};

@@ -14,6 +14,7 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 touch-core = { path = "../../../crates/touch-core" }
+touch-kit-tauri = { path = "../../../crates/touch-kit-tauri" }
 tauri = { version = "2", features = ["tray-icon", "devtools"] }  # devtools: dev mode opens them in release builds too
 tauri-plugin-log = "2"
 tauri-plugin-opener = "2"
@@ -22,6 +23,3 @@ serde.workspace = true
 serde_json.workspace = true
 tracing = { workspace = true, features = ["log"] }
 anyhow.workspace = true
-
-[target.'cfg(windows)'.dependencies]
-windows = { version = "0.62", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging"] }

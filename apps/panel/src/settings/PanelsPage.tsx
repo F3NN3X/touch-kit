@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
-import type { Status } from "../touch/types";
+import type { Status } from "@touch-kit/web";
 import { fileValue, useMonitors, usePanelStatus, type ConfigView, type Json, type PanelEntry } from "./api";
 import { Button, NumberField, Row, Select, TextField, Toggle, useSave } from "./controls";
 import { SetupBar } from "./SetupBar";

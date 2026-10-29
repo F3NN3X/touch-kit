@@ -4,7 +4,7 @@ import { onDeviceMessage } from "../touch/bridge";
 import { onLatency, type LatencySummary, type Percentiles } from "../touch/latency";
 import { useLastError } from "../touch/errors";
 import { useSettings, type ConfigIssue } from "../touch/settings";
-import { isStatus, type Gesture, type Status } from "../touch/types";
+import { isStatus, type Gesture, type Status } from "@touch-kit/web";
 import { C, FONT_MONO } from "../kit/tokens";
 
 const DOT: Record<Status["status"] | "Waiting", string> = {

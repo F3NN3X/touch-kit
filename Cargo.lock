@@ -2582,8 +2582,8 @@ dependencies = [
  "tauri-plugin-log",
  "tauri-plugin-opener",
  "touch-core",
+ "touch-kit-tauri",
  "tracing",
- "windows",
 ]
 
 [[package]]
@@ -4088,6 +4088,27 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.21",
  "tracing",
+ "windows",
+]
+
+[[package]]
+name = "touch-ffi"
+version = "1.1.1"
+dependencies = [
+ "serde",
+ "serde_json",
+ "touch-core",
+]
+
+[[package]]
+name = "touch-kit-tauri"
+version = "1.1.1"
+dependencies = [
+ "log",
+ "serde",
+ "serde_json",
+ "tauri",
+ "touch-core",
  "windows",
 ]
 

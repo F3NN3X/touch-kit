@@ -1,6 +1,5 @@
 //! Touch panel app: touch-core on the Rust side, events into each panel's webview over a Channel.
 
-mod bridge;
 mod calibrate;
 mod config;
 mod driver;
@@ -12,10 +11,9 @@ mod settings;
 mod setup;
 mod testing;
 #[cfg(windows)]
-mod win;
 mod window;
 
-use bridge::UiMsg;
+use touch_kit_tauri::UiMsg;
 use panels::Panels;
 use std::sync::Mutex;
 use tauri::ipc::Channel;

@@ -9,6 +9,9 @@ How: bind the display's USB touch device to **WinUSB** instead of Windows' HID d
 no longer sees a touchscreen at all; the panel app (and `touchprobe`) reads the raw HID reports over
 USB and decides what a touch means.
 
+**In your own app.** The engine is a library with Rust, .NET, C and Tauri bindings; see
+[docs/integrating.md](docs/integrating.md).
+
 **Which displays.** Any USB touchscreen that reports a standard HID Touch Screen collection (Digitizer
 page, usage 0x04) — what every display does for Windows' own touch support. The app finds them by
 that, not by make: it reads each device's report descriptor (field layout, contact count, ranges)
@@ -19,11 +22,14 @@ Pens, touchpads and Bluetooth/I²C touchscreens (most laptops' built-in ones) ar
 ```
 touch-kit/
   crates/touch-core/     library: USB, HID decode, contact tracking, mapping, gestures, replay
+  crates/touch-ffi/      C ABI over touch-core (touch_kit.dll + include/touch_kit.h)
+  crates/touch-kit-tauri/  Tauri glue: never-activating window, Channel bridge to the webview
+  packages/touch-kit-web/  webview half: touch-core messages as DOM pointer events + gestures
+  bindings/dotnet/       C# wrapper (TouchKit.dll) and a console sample
   apps/panel/            Tauri v2 app: no-activate window on the panel, React UI kit
     src-tauri/           Rust side: panels, config + hot reload, settings, pairing, calibration,
                          driver, testing mode, touch → webview bridge
-    src/                 webview: touch bridge (synthetic PointerEvents), kit/, screens/,
-                         settings/
+    src/                 webview: kit/, screens/, settings/ (touch input via @touch-kit/web)
   touchprobe/            Rust CLI over touch-core: list / info / raw / record / touch /
                          gestures / replay / set-mode / get-feature
   captures/              recorded reports + report descriptor; the test fixtures
@@ -66,10 +72,10 @@ Needs Rust (stable), Node 20+, pnpm, and on Windows the WebView2 runtime (ships 
 cargo test --workspace                           # no hardware needed: replays captures/
 cargo clippy --workspace --all-targets -- -D warnings
 
+pnpm install                                     # the whole workspace, from the repo root
+pnpm -r typecheck; pnpm -r test                  # tsc, Vitest (app and @touch-kit/web)
 cd apps\panel
-pnpm install
 pnpm tauri dev                                   # run the panel app
-pnpm typecheck; pnpm test                        # tsc, Vitest
 
 cargo run -p touchprobe -- gestures              # live gestures in the terminal
 cargo run -p touchprobe -- replay ..\..\captures\swipes.jsonl --instant
@@ -82,10 +88,11 @@ Close the panel app before `touchprobe` talks to the device: only one process ca
 
 ### Releasing
 
-Bump the version in `apps/panel/src-tauri/tauri.conf.json`, `apps/panel/package.json` and the three
-`Cargo.toml` files, move the changelog's Unreleased entries under the new version, commit, then push a
-tag: `git tag v1.2.3 && git push origin v1.2.3`. The **Release** workflow tests, builds the installer
-and `touchprobe.exe`, and publishes a GitHub Release with that version's changelog section as notes.
+Bump the version in `apps/panel/src-tauri/tauri.conf.json`, the two `package.json` files
+(`apps/panel`, `packages/touch-kit-web`), `bindings/dotnet/TouchKit/TouchKit.csproj` and the five
+`Cargo.toml` files (`.github/scripts/check-version.ps1` lists them), move the changelog's Unreleased entries under the new version, commit, then push a
+tag: `git tag v1.2.3 && git push origin v1.2.3`. The **Release** workflow tests, builds the installer,
+`touchprobe.exe` and the libraries (`touch_kit.dll`, `touch_kit.h`, `TouchKit.dll`), and publishes a GitHub Release with that version's changelog section as notes.
 
 ## The panel app
 
@@ -141,6 +148,8 @@ it within half a second. Every key, its default and the gesture actions: [docs/c
 - [docs/driver-setup.md](docs/driver-setup.md) — inventory, Zadig swap to WinUSB, probing, recording
   captures, Linux, troubleshooting.
 - [docs/config.md](docs/config.md) — config file reference.
+- [docs/integrating.md](docs/integrating.md) — the same touch input in your own Rust, .NET, C or
+  Tauri app.
 - [docs/PLAN.md](docs/PLAN.md) — device facts, architecture, gesture state machine, tests, risks,
   and the phase log.
 - [CHANGELOG.md](CHANGELOG.md)
