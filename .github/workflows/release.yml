@@ -1,6 +1,9 @@
 # Pushing a tag `v<version>` tests the workspace, builds the Windows installer and touchprobe.exe,
 # and publishes a GitHub Release whose notes are that version's CHANGELOG.md section.
 # The release stays a draft until every asset is uploaded, so a failed build never publishes.
+#
+# Actions are pinned to commit SHAs (tag in the comment): this job can write to the repo, so a
+# moved tag must not change what runs. Dependabot (.github/dependabot.yml) proposes updates.
 
 name: Release
 
@@ -15,26 +18,26 @@ jobs:
   release:
     runs-on: windows-latest
     env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TAG: ${{ github.ref_name }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
         with:
           package_json_file: apps/panel/package.json
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: pnpm
           cache-dependency-path: apps/panel/pnpm-lock.yaml
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
+          toolchain: stable
           components: clippy
 
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
 
       - name: Install frontend dependencies
         working-directory: apps/panel
@@ -58,14 +61,22 @@ jobs:
       - name: Create draft release
         id: draft
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./.github/scripts/release-notes.ps1 -Tag $env:TAG -Out release-notes.md
-          gh release create $env:TAG --draft --title "Touch Panel $env:TAG" --notes-file release-notes.md
-          $id = gh api "repos/${{ github.repository }}/releases" --jq ".[] | select(.tag_name == \`"$env:TAG\`") | .id"
+          # A re-run reuses the draft an earlier attempt created.
+          gh release view $env:TAG --json databaseId 2>$null | Out-Null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $env:TAG --draft --title "Touch Panel $env:TAG" --notes-file release-notes.md
+            if ($LASTEXITCODE -ne 0) { throw "creating the release failed" }
+          }
+          $id = gh release view $env:TAG --json databaseId --jq .databaseId
+          if (-not $id) { throw "no release id for $env:TAG" }
           "id=$id" >> $env:GITHUB_OUTPUT
 
       - name: Build installer
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0.6.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -75,9 +86,13 @@ jobs:
 
       - name: Build and upload touchprobe
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cargo build --release -p touchprobe
-          gh release upload $env:TAG target/release/touchprobe.exe
+          gh release upload $env:TAG target/release/touchprobe.exe --clobber
 
       - name: Publish release
-        run: gh release edit ${{ github.ref_name }} --draft=false
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit $env:TAG --draft=false
