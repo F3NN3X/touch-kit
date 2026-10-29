@@ -31,10 +31,8 @@ pub struct Touchscreen {
 
 /// Every connected touchscreen.
 pub fn touchscreens() -> Result<Vec<Touchscreen>, Error> {
-    let devices: Vec<nusb::DeviceInfo> = nusb::list_devices()
-        .wait()
-        .map_err(|e| Error::Usb(format!("listing USB devices: {e:?}")))?
-        .collect();
+    let devices: Vec<nusb::DeviceInfo> =
+        nusb::list_devices().wait().map_err(|e| Error::Usb(format!("listing USB devices: {e:?}")))?.collect();
     let probe = platform::Probe::new();
     Ok(devices.iter().filter_map(|d| Some(entry(d, probe.classify(d)?))).collect())
 }
@@ -103,8 +101,7 @@ mod platform {
         // SAFETY: SetupAPI/CfgMgr calls with buffers sized as the API requires; the info set is
         // destroyed before returning.
         unsafe {
-            let Ok(set) = SetupDiGetClassDevsW(None, PCWSTR(enumerator.as_ptr()), None, DIGCF_PRESENT | DIGCF_ALLCLASSES)
-            else {
+            let Ok(set) = SetupDiGetClassDevsW(None, PCWSTR(enumerator.as_ptr()), None, DIGCF_PRESENT | DIGCF_ALLCLASSES) else {
                 return out;
             };
             let mut index = 0;

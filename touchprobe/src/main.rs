@@ -144,8 +144,10 @@ fn main() -> Result<()> {
 
 fn load_config(cli: &Cli) -> Result<Config> {
     let mut cfg: Config = match &cli.config {
-        Some(path) => serde_json::from_str(&std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?)
-            .with_context(|| format!("parsing {}", path.display()))?,
+        Some(path) => {
+            serde_json::from_str(&std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?)
+                .with_context(|| format!("parsing {}", path.display()))?
+        }
         None => Config::default(),
     };
     if cli.vid.is_some() {
@@ -162,9 +164,14 @@ fn load_config(cli: &Cli) -> Result<Config> {
     }
     let errors = cfg.validate();
     if !errors.is_empty() {
-        bail!("invalid config:
-  {}", errors.join("
-  "));
+        bail!(
+            "invalid config:
+  {}",
+            errors.join(
+                "
+  "
+            )
+        );
     }
     Ok(cfg)
 }

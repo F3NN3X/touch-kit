@@ -24,10 +24,7 @@ fn run_with(cfg: GestureConfig, events: &[PointerEvent], end: u64) -> Vec<Gestur
     let mut r = GestureRecognizer::new(cfg);
     let mut out: Vec<_> = events.iter().flat_map(|e| r.feed(e)).collect();
     out.extend(r.tick(end));
-    out.into_iter()
-        .map(|g| g.gesture)
-        .filter(|g| !matches!(g, Gesture::DragMove { .. } | Gesture::Pinch { .. }))
-        .collect()
+    out.into_iter().map(|g| g.gesture).filter(|g| !matches!(g, Gesture::DragMove { .. } | Gesture::Pinch { .. })).collect()
 }
 
 #[test]
@@ -115,7 +112,9 @@ fn second_finger_mid_swipe_becomes_two_finger_gesture() {
 
 #[test]
 fn double_tap_gap_boundary() {
-    let taps = |gap: u64| run(&[down(0, 0.0, 0.0, 0), up(0, 0.0, 0.0, 50), down(0, 5.0, 5.0, 50 + gap), up(0, 5.0, 5.0, 100 + gap)], 3000);
+    let taps = |gap: u64| {
+        run(&[down(0, 0.0, 0.0, 0), up(0, 0.0, 0.0, 50), down(0, 5.0, 5.0, 50 + gap), up(0, 5.0, 5.0, 100 + gap)], 3000)
+    };
     assert_eq!(taps(280), vec![Gesture::Tap, Gesture::Tap, Gesture::DoubleTap]);
     assert_eq!(taps(281), vec![Gesture::Tap, Gesture::Tap]);
 }
@@ -123,7 +122,14 @@ fn double_tap_gap_boundary() {
 #[test]
 fn triple_tap_is_one_double_tap_then_a_tap() {
     let g = run(
-        &[down(0, 0.0, 0.0, 0), up(0, 0.0, 0.0, 50), down(0, 0.0, 0.0, 100), up(0, 0.0, 0.0, 150), down(0, 0.0, 0.0, 200), up(0, 0.0, 0.0, 250)],
+        &[
+            down(0, 0.0, 0.0, 0),
+            up(0, 0.0, 0.0, 50),
+            down(0, 0.0, 0.0, 100),
+            up(0, 0.0, 0.0, 150),
+            down(0, 0.0, 0.0, 200),
+            up(0, 0.0, 0.0, 250),
+        ],
         3000,
     );
     assert_eq!(g, vec![Gesture::Tap, Gesture::Tap, Gesture::DoubleTap, Gesture::Tap]);
@@ -153,7 +159,13 @@ fn lift_debounce_joins_a_brief_dropout() {
 #[test]
 fn lift_debounce_rejects_a_far_redown() {
     let g = run(
-        &[down(0, 0.0, 300.0, 0), mv(0, 200.0, 300.0, 100), up(0, 200.0, 300.0, 100), down(0, 1000.0, 300.0, 110), up(0, 1000.0, 300.0, 150)],
+        &[
+            down(0, 0.0, 300.0, 0),
+            mv(0, 200.0, 300.0, 100),
+            up(0, 200.0, 300.0, 100),
+            down(0, 1000.0, 300.0, 110),
+            up(0, 1000.0, 300.0, 150),
+        ],
         2000,
     );
     assert_eq!(g, vec![Gesture::DragStart, Gesture::Swipe { dir: Dir::Right, fingers: 1 }, Gesture::DragEnd, Gesture::Tap]);
@@ -173,7 +185,8 @@ fn pinch_out_and_in() {
         up(1, 575.0, 300.0, 300),
     ];
     let out: Vec<_> = evs.iter().flat_map(|e| r.feed(e)).map(|g| g.gesture).collect();
-    let scales: Vec<f32> = out.iter().filter_map(|g| if let Gesture::Pinch { scale } = g { Some(*scale) } else { None }).collect();
+    let scales: Vec<f32> =
+        out.iter().filter_map(|g| if let Gesture::Pinch { scale } = g { Some(*scale) } else { None }).collect();
     assert_eq!(out.first(), Some(&Gesture::PinchStart));
     assert_eq!(out.last(), Some(&Gesture::PinchEnd));
     assert!(scales.iter().any(|&s| (s - 2.0).abs() < 1e-3), "{scales:?}");
@@ -183,7 +196,14 @@ fn pinch_out_and_in() {
 #[test]
 fn two_finger_drift_is_not_a_pinch() {
     let g = run(
-        &[down(0, 500.0, 300.0, 0), down(1, 600.0, 300.0, 0), mv(0, 505.0, 300.0, 100), mv(1, 610.0, 300.0, 100), up(0, 505.0, 300.0, 200), up(1, 610.0, 300.0, 200)],
+        &[
+            down(0, 500.0, 300.0, 0),
+            down(1, 600.0, 300.0, 0),
+            mv(0, 505.0, 300.0, 100),
+            mv(1, 610.0, 300.0, 100),
+            up(0, 505.0, 300.0, 200),
+            up(1, 610.0, 300.0, 200),
+        ],
         2000,
     );
     assert!(g.is_empty(), "{g:?}");

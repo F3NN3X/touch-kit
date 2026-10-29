@@ -289,8 +289,17 @@ fn unknown_keys(file: &serde_json::Value, known: &serde_json::Value, prefix: &st
 /// Matches the webview's `gestureKey`: the gesture's name, or `Swipe <Dir> x<fingers>`.
 fn is_gesture_key(key: &str) -> bool {
     const NAMES: [&str; 11] = [
-        "Tap", "DoubleTap", "LongPress", "LongPressRepeat", "DragStart", "DragMove", "DragEnd",
-        "PinchStart", "Pinch", "PinchEnd", "ThreeFingerTap",
+        "Tap",
+        "DoubleTap",
+        "LongPress",
+        "LongPressRepeat",
+        "DragStart",
+        "DragMove",
+        "DragEnd",
+        "PinchStart",
+        "Pinch",
+        "PinchEnd",
+        "ThreeFingerTap",
     ];
     if NAMES.contains(&key) {
         return true;

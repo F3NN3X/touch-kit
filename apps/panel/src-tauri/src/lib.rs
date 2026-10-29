@@ -13,13 +13,13 @@ mod testing;
 #[cfg(windows)]
 mod window;
 
-use touch_kit_tauri::UiMsg;
 use panels::Panels;
 use std::sync::Mutex;
 use tauri::ipc::Channel;
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{Manager, RunEvent, State, Webview};
+use touch_kit_tauri::UiMsg;
 
 /// A panel window asks for its touch stream; which panel it is follows from its label.
 #[tauri::command]

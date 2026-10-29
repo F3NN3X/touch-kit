@@ -21,7 +21,9 @@ pub enum Output {
     Pointer(PointerEvent),
     Gesture(GestureEvent),
     /// A report id that is not a touch report (e.g. mouse mode). Reported once per id per session.
-    Ignored { report_id: u8 },
+    Ignored {
+        report_id: u8,
+    },
 }
 
 pub struct Pipeline {

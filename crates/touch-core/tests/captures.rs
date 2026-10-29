@@ -20,7 +20,11 @@ fn discrete(out: &[Output]) -> Vec<Gesture> {
         .filter(|g| {
             !matches!(
                 g,
-                Gesture::DragStart | Gesture::DragMove { .. } | Gesture::DragEnd | Gesture::Pinch { .. } | Gesture::LongPressRepeat { .. }
+                Gesture::DragStart
+                    | Gesture::DragMove { .. }
+                    | Gesture::DragEnd
+                    | Gesture::Pinch { .. }
+                    | Gesture::LongPressRepeat { .. }
             )
         })
         .collect()
@@ -36,11 +40,8 @@ fn tap_corners() {
     // The two BL taps are ~290 ms apart: outside the spec's 280 ms double-tap window.
     assert_eq!(discrete(&out), vec![Gesture::Tap; 5]);
     // TL, TR, BR, BL, BL — by panel quadrant (1920x550).
-    let quadrants: Vec<(bool, bool)> = gestures(&out)
-        .iter()
-        .filter(|g| g.gesture == Gesture::Tap)
-        .map(|g| (g.x > 960.0, g.y > 275.0))
-        .collect();
+    let quadrants: Vec<(bool, bool)> =
+        gestures(&out).iter().filter(|g| g.gesture == Gesture::Tap).map(|g| (g.x > 960.0, g.y > 275.0)).collect();
     assert_eq!(quadrants, vec![(false, false), (true, false), (true, true), (false, true), (false, true)]);
 }
 
@@ -74,10 +75,8 @@ fn swipe_with_dropout_is_one_stroke() {
 fn two_finger_swipe_then_pinch_out_and_in() {
     let out = replay("two-finger");
     assert_eq!(discrete(&out), vec![swipe(Dir::Left, 2), Gesture::PinchStart, Gesture::PinchEnd]);
-    let scales: Vec<f32> = gestures(&out)
-        .iter()
-        .filter_map(|g| if let Gesture::Pinch { scale } = g.gesture { Some(scale) } else { None })
-        .collect();
+    let scales: Vec<f32> =
+        gestures(&out).iter().filter_map(|g| if let Gesture::Pinch { scale } = g.gesture { Some(scale) } else { None }).collect();
     let peak = scales.iter().copied().fold(0.0, f32::max);
     let last = *scales.last().unwrap();
     assert!(peak > 3.0, "pinch out peaked at {peak}");

@@ -35,12 +35,16 @@ pub fn open(app: &AppHandle, page: Option<&str>) {
         let _ = w.set_focus();
         return;
     }
-    let built = WebviewWindowBuilder::new(app, LABEL, WebviewUrl::App(format!("index.html#settings{}", page.map(|p| format!("/{p}")).unwrap_or_default()).into()))
-        .title("Touch Kit settings")
-        .inner_size(980.0, 720.0)
-        .min_inner_size(720.0, 480.0)
-        .center()
-        .build();
+    let built = WebviewWindowBuilder::new(
+        app,
+        LABEL,
+        WebviewUrl::App(format!("index.html#settings{}", page.map(|p| format!("/{p}")).unwrap_or_default()).into()),
+    )
+    .title("Touch Kit settings")
+    .inner_size(980.0, 720.0)
+    .min_inner_size(720.0, 480.0)
+    .center()
+    .build();
     if let Err(e) = built {
         log::error!("opening settings: {e}");
     }
@@ -58,9 +62,10 @@ pub struct ConfigView {
 
 #[tauri::command]
 pub fn config_get(path: State<'_, ConfigPath>, current: State<'_, Mutex<AppConfig>>) -> ConfigView {
-    let (file, file_error) = match std::fs::read_to_string(&path.0).map_err(|e| e.to_string()).and_then(|t| {
-        serde_json::from_str::<Value>(&t).map_err(|e| e.to_string())
-    }) {
+    let (file, file_error) = match std::fs::read_to_string(&path.0)
+        .map_err(|e| e.to_string())
+        .and_then(|t| serde_json::from_str::<Value>(&t).map_err(|e| e.to_string()))
+    {
         Ok(v) => (v, None),
         Err(e) => (Value::Null, Some(e)),
     };
@@ -83,7 +88,8 @@ pub fn edit_config(path: &std::path::Path, edits: &[(&str, Option<Value>)]) -> R
     for (key, value) in edits {
         set_path(&mut root, key, value.clone()).map_err(|e| vec![e])?;
     }
-    let next = serde_json::to_string_pretty(&root).expect("a Value serialises") + "
+    let next = serde_json::to_string_pretty(&root).expect("a Value serialises")
+        + "
 ";
     let loaded = config::check(&next);
     if loaded.config.is_none() {
@@ -91,7 +97,9 @@ pub fn edit_config(path: &std::path::Path, edits: &[(&str, Option<Value>)]) -> R
     }
     // Write-then-rename, so the reload never reads a half-written file.
     let tmp = path.with_extension("json.tmp");
-    std::fs::write(&tmp, next).and_then(|()| std::fs::rename(&tmp, path)).map_err(|e| vec![format!("writing the config: {e}")])?;
+    std::fs::write(&tmp, next)
+        .and_then(|()| std::fs::rename(&tmp, path))
+        .map_err(|e| vec![format!("writing the config: {e}")])?;
     let keys: Vec<&str> = edits.iter().map(|(k, _)| *k).collect();
     log::info!("settings: {} changed", keys.join(", "));
     Ok(())

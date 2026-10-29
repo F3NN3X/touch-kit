@@ -39,15 +39,25 @@ pub enum Gesture {
     Tap,
     DoubleTap,
     LongPress,
-    LongPressRepeat { n: u32 },
+    LongPressRepeat {
+        n: u32,
+    },
     DragStart,
     /// Offset from the drag's start point.
-    DragMove { dx: f32, dy: f32 },
+    DragMove {
+        dx: f32,
+        dy: f32,
+    },
     DragEnd,
-    Swipe { dir: Dir, fingers: u8 },
+    Swipe {
+        dir: Dir,
+        fingers: u8,
+    },
     PinchStart,
     /// Current span / span when the second finger landed.
-    Pinch { scale: f32 },
+    Pinch {
+        scale: f32,
+    },
     PinchEnd,
     ThreeFingerTap,
 }
@@ -76,13 +86,33 @@ impl P {
 #[derive(Clone, Debug)]
 enum State {
     Idle,
-    One { start: P, t0: u64, last: P },
-    Drag { start: P, t0: u64, last: P },
+    One {
+        start: P,
+        t0: u64,
+        last: P,
+    },
+    Drag {
+        start: P,
+        t0: u64,
+        last: P,
+    },
     /// Finger lifted mid-drag; a nearby re-Down before the deadline continues the stroke.
-    Lifting { start: P, t0: u64, last: P, t_up: u64 },
-    Held { start: P, next_repeat: u64, n: u32 },
+    Lifting {
+        start: P,
+        t0: u64,
+        last: P,
+        t_up: u64,
+    },
+    Held {
+        start: P,
+        next_repeat: u64,
+        n: u32,
+    },
     Multi(Multi),
-    Pinch { start_span: f32, last_c: P },
+    Pinch {
+        start_span: f32,
+        last_c: P,
+    },
     /// Swallows the rest of a gesture that has already been decided or abandoned.
     Consumed,
 }

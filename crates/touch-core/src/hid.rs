@@ -88,12 +88,7 @@ impl ReportDescriptor {
         (bits as usize).div_ceil(8) + usize::from(self.uses_report_ids)
     }
     pub fn max_input_len(&self) -> usize {
-        self.report_bits
-            .keys()
-            .filter(|(k, _)| *k == Kind::Input)
-            .map(|(k, id)| self.report_len(*k, *id))
-            .max()
-            .unwrap_or(0)
+        self.report_bits.keys().filter(|(k, _)| *k == Kind::Input).map(|(k, id)| self.report_len(*k, *id)).max().unwrap_or(0)
     }
     /// First field (and element index) of the given kind carrying `usage`.
     pub fn find(&self, kind: Kind, usage: u32) -> Option<(usize, u32)> {

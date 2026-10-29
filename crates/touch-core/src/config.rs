@@ -39,11 +39,9 @@ impl DeviceConfig {
     pub fn describe(&self) -> String {
         match (self.vid, self.pid) {
             (None, None) => "any touchscreen".into(),
-            (v, p) => format!(
-                "{}:{}",
-                v.map_or("*".into(), |v| format!("{v:04x}")),
-                p.map_or("*".into(), |p| format!("{p:04x}"))
-            ),
+            (v, p) => {
+                format!("{}:{}", v.map_or("*".into(), |v| format!("{v:04x}")), p.map_or("*".into(), |p| format!("{p:04x}")))
+            }
         }
     }
 }

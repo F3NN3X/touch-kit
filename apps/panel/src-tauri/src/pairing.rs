@@ -142,7 +142,8 @@ fn finish(app: &AppHandle, cfg: &AppConfig, result: PairResult) {
     if let PairResult::Paired { index, port } = result.clone() {
         let (index, port) = (&index, &port);
         // The port moves to this panel; a panel that had it pinned loses it (it was the wrong one).
-        let mut edits: Vec<(String, Option<Value>)> = vec![(format!("panels.{index}.device.port"), Some(Value::from(port.clone())))];
+        let mut edits: Vec<(String, Option<Value>)> =
+            vec![(format!("panels.{index}.device.port"), Some(Value::from(port.clone())))];
         for (j, p) in cfg.panels.iter().enumerate() {
             if j != *index && p.device.port.as_deref() == Some(port) {
                 edits.push((format!("panels.{j}.device.port"), None));

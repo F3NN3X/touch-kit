@@ -16,10 +16,7 @@ fn status_messages() {
         json!({"status": "Connected", "interface": 0, "report_len": 64, "port": "B-4.2"})
     );
     assert_eq!(wire(DeviceMsg::Status(Status::Disconnected)), json!({"status": "Disconnected"}));
-    assert_eq!(
-        wire(DeviceMsg::Status(Status::Error { message: "x".into() })),
-        json!({"status": "Error", "message": "x"})
-    );
+    assert_eq!(wire(DeviceMsg::Status(Status::Error { message: "x".into() })), json!({"status": "Error", "message": "x"}));
 }
 
 #[test]

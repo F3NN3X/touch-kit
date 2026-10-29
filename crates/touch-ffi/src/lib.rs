@@ -113,9 +113,12 @@ pub extern "C" fn tk_report(record_seconds: u32) -> *mut c_char {
         for d in devices.iter().filter(|d| d.ready && record_seconds > 0) {
             let panel = touch_core::report::open(&d.port).map_err(|e| e.to_string())?;
             let duration = Duration::from_secs(record_seconds.into());
-            recordings.push(touch_core::report::record(&panel, &PanelConfig::default(), duration, || false).map_err(|e| e.to_string())?);
+            recordings.push(
+                touch_core::report::record(&panel, &PanelConfig::default(), duration, || false).map_err(|e| e.to_string())?,
+            );
         }
-        serde_json::to_string(&serde_json::json!({ "touchscreens": devices, "recordings": recordings })).map_err(|e| e.to_string())
+        serde_json::to_string(&serde_json::json!({ "touchscreens": devices, "recordings": recordings }))
+            .map_err(|e| e.to_string())
     };
     match run() {
         Ok(json) => owned(json),

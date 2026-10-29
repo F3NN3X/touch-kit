@@ -49,8 +49,12 @@ pub struct Bound {
 #[serde(tag = "result", rename_all = "snake_case")]
 pub enum SetupResult {
     /// `bound` may be empty: finished or timed out before any tap.
-    Done { bound: Vec<Bound> },
-    Failed { message: String },
+    Done {
+        bound: Vec<Bound>,
+    },
+    Failed {
+        message: String,
+    },
 }
 
 /// Target distance from the centre for each of `n` monitors, spread evenly from the centre out.
@@ -221,10 +225,7 @@ pub async fn setup_start(
         let mut bound_monitor = vec![false; monitors.len()];
         let mut bindings: Vec<(String, MonitorInfo)> = Vec::new();
         let mut idle_until = Instant::now() + IDLE_TIMEOUT;
-        while !cancel.load(Ordering::Relaxed)
-            && Instant::now() < idle_until
-            && bindings.len() < monitors.len().min(ports.len())
-        {
+        while !cancel.load(Ordering::Relaxed) && Instant::now() < idle_until && bindings.len() < monitors.len().min(ports.len()) {
             match hit_rx.recv_timeout(Duration::from_millis(100)) {
                 Ok((port, u, v)) => {
                     if bindings.iter().any(|(p, _)| *p == port) {
@@ -246,7 +247,7 @@ pub async fn setup_start(
             }
         }
         drop(probes); // release every device before the panels reopen them
-        // Long enough to read the last "set up" on its screen.
+                      // Long enough to read the last "set up" on its screen.
         std::thread::sleep(Duration::from_millis(800));
         windows.into_iter().for_each(|w| drop(w.destroy()));
         finish(&app, &cfg, &bindings);
@@ -321,11 +322,8 @@ mod tests {
     #[test]
     fn bindings_fill_the_blank_default_panel_then_append() {
         let effective = vec![PanelEntry::default()];
-        let out = apply(
-            vec![json!({})],
-            &effective,
-            &[("p1".into(), mon("D4", [1920, 550])), ("p2".into(), mon("D5", [1280, 800]))],
-        );
+        let out =
+            apply(vec![json!({})], &effective, &[("p1".into(), mon("D4", [1920, 550])), ("p2".into(), mon("D5", [1280, 800]))]);
         assert_eq!(out.len(), 2);
         assert_eq!(out[0]["device"]["port"], "p1");
         assert_eq!(out[0]["monitor"]["name"], "D4");

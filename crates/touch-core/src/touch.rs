@@ -64,14 +64,8 @@ impl Layout {
             }
             let rep = reports.entry(f.report_id).or_default();
             // Finger collection if present, otherwise the application collection (single-touch devices).
-            let group = f
-                .path
-                .iter()
-                .rev()
-                .find(|c| c.usage == U_FINGER)
-                .or_else(|| f.path.first())
-                .map(|c| c.index)
-                .unwrap_or(0);
+            let group =
+                f.path.iter().rev().find(|c| c.usage == U_FINGER).or_else(|| f.path.first()).map(|c| c.index).unwrap_or(0);
 
             for i in 0..f.count {
                 let Some(u) = f.usage_at(i) else { continue };
@@ -80,10 +74,9 @@ impl Layout {
                     U_CONTACT_COUNT => rep.contact_count = Some(r),
                     U_SCAN_TIME => rep.scan_time = Some(r),
                     U_TIP | U_CONTACT_ID | U_X | U_Y | U_CONFIDENCE | U_WIDTH | U_HEIGHT => {
-                        let slot = slots.entry((f.report_id, group)).or_insert_with(|| Slot {
-                            first_bit: f.element_offset(i),
-                            ..Default::default()
-                        });
+                        let slot = slots
+                            .entry((f.report_id, group))
+                            .or_insert_with(|| Slot { first_bit: f.element_offset(i), ..Default::default() });
                         let target = match u {
                             U_TIP => &mut slot.tip,
                             U_CONTACT_ID => &mut slot.id,

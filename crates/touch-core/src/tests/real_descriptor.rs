@@ -36,9 +36,7 @@ fn decode(report_prefix: &str, cc: u8) -> Vec<(u32, i32, i32)> {
     r.resize(64, 0);
     r[55] = cc; // payload byte 54 = Contact Count
     let Decoded::Frame(f) = Assembler::default().feed(&rd, &layout, &r) else { panic!("expected a frame") };
-    f.iter()
-        .map(|c| (c.id, (c.x * 1920.0).round() as i32, (c.y * 550.0).round() as i32))
-        .collect()
+    f.iter().map(|c| (c.id, (c.x * 1920.0).round() as i32, (c.y * 550.0).round() as i32)).collect()
 }
 
 #[test]

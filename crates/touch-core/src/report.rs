@@ -180,16 +180,15 @@ pub fn hid_report(p: &Panel) -> Result<HidReport, crate::Error> {
         .iter()
         .map(|(id, r)| {
             let axis = |usage: u32| {
-                fields
-                    .iter()
-                    .find(|f| f.kind == "Input" && f.report_id == *id && f.usage == hid::usage_name(usage))
-                    .map(|f| Axis {
+                fields.iter().find(|f| f.kind == "Input" && f.report_id == *id && f.usage == hid::usage_name(usage)).map(|f| {
+                    Axis {
                         logical: f.logical,
                         physical: f.physical,
                         unit: f.unit.clone(),
                         unit_exponent: f.unit_exponent,
                         size_mm: size_mm(f),
-                    })
+                    }
+                })
             };
             TouchSummary {
                 report_id: *id,
@@ -205,16 +204,15 @@ pub fn hid_report(p: &Panel) -> Result<HidReport, crate::Error> {
         })
         .collect();
     touch.sort_by_key(|t| t.report_id);
-    let other_inputs: Vec<String> = p
-        .rd
-        .fields
-        .iter()
-        .filter(|f| f.kind == Kind::Input && !f.is_constant())
-        .filter_map(|f| f.application().filter(|&a| a != U_TOUCH_SCREEN).map(|a| (f.report_id, a)))
-        .collect::<std::collections::BTreeSet<_>>()
-        .into_iter()
-        .map(|(id, a)| format!("report {id:#04x}: {}", hid::usage_name(a)))
-        .collect();
+    let other_inputs: Vec<String> =
+        p.rd.fields
+            .iter()
+            .filter(|f| f.kind == Kind::Input && !f.is_constant())
+            .filter_map(|f| f.application().filter(|&a| a != U_TOUCH_SCREEN).map(|a| (f.report_id, a)))
+            .collect::<std::collections::BTreeSet<_>>()
+            .into_iter()
+            .map(|(id, a)| format!("report {id:#04x}: {}", hid::usage_name(a)))
+            .collect();
     let (contact_count_max, contact_count_max_error) = match p.contact_max() {
         Ok(v) => (v, None),
         Err(e) => (None, Some(e.to_string())),
@@ -275,7 +273,9 @@ fn add_fields(out: &mut Vec<FieldInfo>, kind: &str, reports: &[impl hidreport::R
                 F::Constant(_) => continue,
             };
             let physical = match physical {
-                (Some(lo), Some(hi)) if (i32::from(lo), i32::from(hi)) != (0, 0) => Some([i32::from(lo).into(), i32::from(hi).into()]),
+                (Some(lo), Some(hi)) if (i32::from(lo), i32::from(hi)) != (0, 0) => {
+                    Some([i32::from(lo).into(), i32::from(hi).into()])
+                }
                 _ => None,
             };
             let unit = unit.filter(|u| u32::from(*u) != 0);

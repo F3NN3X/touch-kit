@@ -32,9 +32,15 @@ const REPLAY_GAP: Duration = Duration::from_secs(2);
 #[serde(tag = "status")]
 pub enum Status {
     /// `port`: where the device is plugged in (see `usb::location`).
-    Connected { interface: u8, report_len: usize, port: String },
+    Connected {
+        interface: u8,
+        report_len: usize,
+        port: String,
+    },
     Disconnected,
-    Error { message: String },
+    Error {
+        message: String,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
@@ -218,10 +224,15 @@ fn session(panel: &Panel, cfg: &mut Config, tx: &Sender<DeviceMsg>, ctrl: &Recei
     }
 }
 
-fn run_replay(rec: &Recording, port: String, panel: &PanelConfig, gestures: &GestureConfig, tx: &Sender<DeviceMsg>, ctrl: &Receiver<Ctrl>) {
-    let pipe = hid::parse(&rec.descriptor)
-        .map_err(Error::Descriptor)
-        .and_then(|rd| Pipeline::new(rd, panel, gestures));
+fn run_replay(
+    rec: &Recording,
+    port: String,
+    panel: &PanelConfig,
+    gestures: &GestureConfig,
+    tx: &Sender<DeviceMsg>,
+    ctrl: &Receiver<Ctrl>,
+) {
+    let pipe = hid::parse(&rec.descriptor).map_err(Error::Descriptor).and_then(|rd| Pipeline::new(rd, panel, gestures));
     let mut pipe = match pipe {
         Ok(p) => p,
         Err(e) => {

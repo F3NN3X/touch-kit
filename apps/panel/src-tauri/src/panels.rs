@@ -3,7 +3,6 @@
 //! A change to the panel list (count, name, device, monitor) rebuilds all of them; geometry and
 //! gesture threshold changes are applied to the running devices in place.
 
-use touch_kit_tauri::{Bridge, UiMsg};
 use crate::config::{AppConfig, Issue, PanelEntry};
 use crate::testing;
 use crate::window::{self, MonitorInfo};
@@ -12,6 +11,7 @@ use std::sync::Mutex;
 use tauri::ipc::Channel;
 use tauri::{AppHandle, Emitter, WebviewWindow};
 use touch_core::{Status, TouchDevice};
+use touch_kit_tauri::{Bridge, UiMsg};
 
 struct Running {
     /// Position in the config's `panels`; virtual panels follow after the last one.

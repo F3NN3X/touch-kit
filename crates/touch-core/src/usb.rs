@@ -106,9 +106,7 @@ pub fn open(cfg: &DeviceConfig, taken: &[String]) -> Result<Panel, Error> {
         } else if alt.class() != 3 {
             continue;
         }
-        let ep = alt
-            .endpoints()
-            .find(|e| e.direction() == Direction::In && e.transfer_type() == TransferType::Interrupt);
+        let ep = alt.endpoints().find(|e| e.direction() == Direction::In && e.transfer_type() == TransferType::Interrupt);
         let Some(ep) = ep else { continue };
         let rdlen = alt.descriptors().find(|d| d.descriptor_type() == 0x21).and_then(|d| {
             let b = d.as_bytes();

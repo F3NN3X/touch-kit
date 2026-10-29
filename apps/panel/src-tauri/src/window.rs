@@ -101,7 +101,8 @@ mod tests {
             ..Default::default()
         };
         assert_eq!(pick_monitor(&ms, &by_name, &[]).unwrap().position, [596, -1440]);
-        let by_pos = PanelEntry { monitor: Some(MonitorMatch { name: None, position: Some([3840, -1262]) }), ..Default::default() };
+        let by_pos =
+            PanelEntry { monitor: Some(MonitorMatch { name: None, position: Some([3840, -1262]) }), ..Default::default() };
         assert_eq!(pick_monitor(&ms, &by_pos, &[]).unwrap().name.as_deref(), Some(r"\\.\DISPLAY1"));
     }
 
