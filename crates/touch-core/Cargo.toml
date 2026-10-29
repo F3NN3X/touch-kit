@@ -1,6 +1,6 @@
 [package]
 name = "touch-core"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2021"
 description = "Raw USB HID touch input: device access, frame decoding, mapping and gesture recognition"
 license = "MIT"
@@ -14,3 +14,7 @@ serde_json.workspace = true
 tracing.workspace = true
 hidreport.workspace = true
 hut.workspace = true
+
+# Windows only: finding touchscreens Windows' HID driver still owns (SetupAPI), see discover.rs.
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62", features = ["Win32_Devices_DeviceAndDriverInstallation", "Win32_Foundation"] }
