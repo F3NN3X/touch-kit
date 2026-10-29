@@ -1,0 +1,27 @@
+[package]
+name = "panel"
+version = "0.1.0"
+edition = "2021"
+description = "Touch panel prototype driven by raw USB touch input"
+license = "MIT"
+
+[lib]
+name = "panel_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+touch-core = { path = "../../../crates/touch-core" }
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-log = "2"
+tauri-plugin-opener = "2"
+log = "0.4"
+serde.workspace = true
+serde_json.workspace = true
+tracing = { workspace = true, features = ["log"] }
+anyhow.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging"] }

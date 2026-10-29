@@ -1,0 +1,17 @@
+[workspace]
+resolver = "2"
+members = ["crates/touch-core", "touchprobe", "apps/panel/src-tauri"]
+
+[workspace.dependencies]
+nusb = "0.2.9"
+futures-core = "0.3.29"
+anyhow = "1"
+thiserror = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+hidreport = "0.6"
+hut = "0.5"
+
+[profile.release]
+opt-level = 3

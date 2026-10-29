@@ -1,0 +1,14 @@
+[package]
+name = "touchprobe"
+version = "0.1.0"
+edition = "2021"
+description = "Read a USB HID touch panel directly over WinUSB/libusb, bypassing the OS touch stack"
+license = "MIT"
+
+[dependencies]
+touch-core = { path = "../crates/touch-core" }
+nusb.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+clap = { version = "4", features = ["derive"] }

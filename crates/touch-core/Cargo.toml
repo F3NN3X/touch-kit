@@ -1,0 +1,16 @@
+[package]
+name = "touch-core"
+version = "0.1.0"
+edition = "2021"
+description = "Raw USB HID touch input: device access, frame decoding, mapping and gesture recognition"
+license = "MIT"
+
+[dependencies]
+nusb.workspace = true
+futures-core.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+hidreport.workspace = true
+hut.workspace = true

@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "settings",
+  "description": "Settings window: core APIs only; config edits are app commands",
+  "windows": ["settings"],
+  "permissions": ["core:default"]
+}

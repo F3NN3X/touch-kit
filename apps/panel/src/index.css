@@ -1,0 +1,58 @@
+@import "tailwindcss";
+/* Bundled fonts: the panel must work offline. */
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+@import "material-symbols/rounded.css";
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #050506;
+  color: #ededf0;
+  font-family: "Geist Variable", system-ui, sans-serif;
+  /* No text selection or callouts: the panel is driven only by raw touch. */
+  user-select: none;
+  cursor: none;
+}
+
+/* The settings window is a normal mouse-driven window. */
+.settings,
+.settings body,
+.settings #root {
+  cursor: auto;
+  user-select: text;
+  background: #09090b;
+  color-scheme: dark;
+}
+
+
+@keyframes rip {
+  from {
+    transform: scale(0.2);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.55);
+    opacity: 0.2;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

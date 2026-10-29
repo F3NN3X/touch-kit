@@ -1,0 +1,71 @@
+05 0d 09 04 a1 01 85 04 09 22 a1 02 05 0d 95 01 75 06 09 51 15 00 25 3f 81 02 09 42 25 01 75 01 95 01 81 02 75 01 95 01 81 03 05 01 75 10 55 0e 65 11 09 30 26 00 40 35 00 46 15 0c 81 42 09 31 26 00 40 46 cb 06 81 42 c0 05 0d 09 22 a1 02 05 0d 95 01 75 06 09 51 15 00 25 3f 81 02 09 42 25 01 75 01 95 01 81 02 75 01 95 01 81 03 05 01 75 10 55 0e 65 11 09 30 26 00 40 35 00 46 15 0c 81 42 09 31 26 00 40 46 cb 06 81 42 c0 05 0d 09 22 a1 02 05 0d 95 01 75 06 09 51 15 00 25 3f 81 02 09 42 25 01 75 01 95 01 81 02 75 01 95 01 81 03 05 01 75 10 55 0e 65 11 09 30 26 00 40 35 00 46 15 0c 81 42 09 31 26 00 40 46 cb 06 81 42 c0 05 0d 09 22 a1 02 05 0d 95 01 75 06 09 51 15 00 25 3f 81 02 09 42 25 01 75 01 95 01 81 02 75 01 95 01 81 03 05 01 75 10 55 0e 65 11 09 30 26 00 40 35 00 46 15 0c 81 42 09 31 26 00 40 46 cb 06 81 42 c0 05 0d 09 22 a1 02 05 0d 95 01 75 06 09 51 15 00 25 3f 81 02 09 42 25 01 75 01 95 01 81 02 75 01 95 01 81 03 05 01 75 10 55 0e 65 11 09 30 26 00 40 35 00 46 15 0c 81 42 09 31 26 00 40 46 cb 06 81 42 c0 05 0d 09 22 a1 02 05 0d 95 01 75 06 09 51 15 00 25 3f 81 02 09 42 25 01 75 01 95 01 81 02 75 01 95 01 81 03 05 01 75 10 55 0e 65 11 09 30 26 00 40 35 00 46 15 0c 81 42 09 31 26 00 40 46 cb 06 81 42 c0 05 0d 09 22 a1 02 05 0d 95 01 75 06 09 51 15 00 25 3f 81 02 09 42 25 01 75 01 95 01 81 02 75 01 95 01 81 03 05 01 75 10 55 0e 65 11 09 30 26 00 40 35 00 46 15 0c 81 42 09 31 26 00 40 46 cb 06 81 42 c0 05 0d 09 22 a1 02 05 0d 95 01 75 06 09 51 15 00 25 3f 81 02 09 42 25 01 75 01 95 01 81 02 75 01 95 01 81 03 05 01 75 10 55 0e 65 11 09 30 26 00 40 35 00 46 15 0c 81 42 09 31 26 00 40 46 cb 06 81 42 c0 05 0d 09 22 a1 02 05 0d 95 01 75 06 09 51 15 00 25 3f 81 02 09 42 25 01 75 01 95 01 81 02 75 01 95 01 81 03 05 01 75 10 55 0e 65 11 09 30 26 00 40 35 00 46 15 0c 81 42 09 31 26 00 40 46 cb 06 81 42 c0 05 0d 09 22 a1 02 05 0d 95 01 75 06 09 51 15 00 25 3f 81 02 09 42 25 01 75 01 95 01 81 02 75 01 95 01 81 03 05 01 75 10 55 0e 65 11 09 30 26 00 40 35 00 46 15 0c 81 42 09 31 26 00 40 46 cb 06 81 42 c0 05 0d 09 56 55 00 65 00 27 ff ff ff 7f 95 01 75 20 81 02 09 54 25 7f 95 01 75 08 81 02 75 08 95 08 81 03 85 02 09 55 25 0a 75 08 95 01 b1 02 06 00 ff 09 c5 85 06 15 00 26 ff 00 75 08 96 00 01 b1 02 c0 06 00 ff 09 01 a1 01 09 01 85 03 15 00 26 ff 00 75 08 95 3f 81 02 06 00 ff 09 01 15 00 26 ff 00 75 08 95 3f 91 02 c0 05 01 09 02 a1 01 85 05 09 01 a1 00 05 09 19 01 29 05 15 00 25 01 95 05 75 01 81 02 95 01 75 03 81 01 05 01 75 10 95 01 55 0e 65 11 09 30 26 00 40 35 00 46 15 0c 81 42 09 31 26 00 40 46 cb 06 81 42 c0 c0
+
+uses report ids: true
+  Feature report 0x02: 2 bytes
+  Feature report 0x06: 257 bytes
+  Input report 0x03: 64 bytes
+  Input report 0x04: 64 bytes
+  Input report 0x05: 6 bytes
+  Output report 0x03: 64 bytes
+
+Input   id=0x04 bit=0    6x1   data  var [0..63] Contact Identifier :: Touch Screen#0 > Finger#1
+Input   id=0x04 bit=6    1x1   data  var [0..1] Tip Switch :: Touch Screen#0 > Finger#1
+Input   id=0x04 bit=7    1x1   const var [0..1] - :: Touch Screen#0 > Finger#1
+Input   id=0x04 bit=8    16x1   data  var [0..16384] GD X :: Touch Screen#0 > Finger#1
+Input   id=0x04 bit=24   16x1   data  var [0..16384] GD Y :: Touch Screen#0 > Finger#1
+Input   id=0x04 bit=40   6x1   data  var [0..63] Contact Identifier :: Touch Screen#0 > Finger#2
+Input   id=0x04 bit=46   1x1   data  var [0..1] Tip Switch :: Touch Screen#0 > Finger#2
+Input   id=0x04 bit=47   1x1   const var [0..1] - :: Touch Screen#0 > Finger#2
+Input   id=0x04 bit=48   16x1   data  var [0..16384] GD X :: Touch Screen#0 > Finger#2
+Input   id=0x04 bit=64   16x1   data  var [0..16384] GD Y :: Touch Screen#0 > Finger#2
+Input   id=0x04 bit=80   6x1   data  var [0..63] Contact Identifier :: Touch Screen#0 > Finger#3
+Input   id=0x04 bit=86   1x1   data  var [0..1] Tip Switch :: Touch Screen#0 > Finger#3
+Input   id=0x04 bit=87   1x1   const var [0..1] - :: Touch Screen#0 > Finger#3
+Input   id=0x04 bit=88   16x1   data  var [0..16384] GD X :: Touch Screen#0 > Finger#3
+Input   id=0x04 bit=104  16x1   data  var [0..16384] GD Y :: Touch Screen#0 > Finger#3
+Input   id=0x04 bit=120  6x1   data  var [0..63] Contact Identifier :: Touch Screen#0 > Finger#4
+Input   id=0x04 bit=126  1x1   data  var [0..1] Tip Switch :: Touch Screen#0 > Finger#4
+Input   id=0x04 bit=127  1x1   const var [0..1] - :: Touch Screen#0 > Finger#4
+Input   id=0x04 bit=128  16x1   data  var [0..16384] GD X :: Touch Screen#0 > Finger#4
+Input   id=0x04 bit=144  16x1   data  var [0..16384] GD Y :: Touch Screen#0 > Finger#4
+Input   id=0x04 bit=160  6x1   data  var [0..63] Contact Identifier :: Touch Screen#0 > Finger#5
+Input   id=0x04 bit=166  1x1   data  var [0..1] Tip Switch :: Touch Screen#0 > Finger#5
+Input   id=0x04 bit=167  1x1   const var [0..1] - :: Touch Screen#0 > Finger#5
+Input   id=0x04 bit=168  16x1   data  var [0..16384] GD X :: Touch Screen#0 > Finger#5
+Input   id=0x04 bit=184  16x1   data  var [0..16384] GD Y :: Touch Screen#0 > Finger#5
+Input   id=0x04 bit=200  6x1   data  var [0..63] Contact Identifier :: Touch Screen#0 > Finger#6
+Input   id=0x04 bit=206  1x1   data  var [0..1] Tip Switch :: Touch Screen#0 > Finger#6
+Input   id=0x04 bit=207  1x1   const var [0..1] - :: Touch Screen#0 > Finger#6
+Input   id=0x04 bit=208  16x1   data  var [0..16384] GD X :: Touch Screen#0 > Finger#6
+Input   id=0x04 bit=224  16x1   data  var [0..16384] GD Y :: Touch Screen#0 > Finger#6
+Input   id=0x04 bit=240  6x1   data  var [0..63] Contact Identifier :: Touch Screen#0 > Finger#7
+Input   id=0x04 bit=246  1x1   data  var [0..1] Tip Switch :: Touch Screen#0 > Finger#7
+Input   id=0x04 bit=247  1x1   const var [0..1] - :: Touch Screen#0 > Finger#7
+Input   id=0x04 bit=248  16x1   data  var [0..16384] GD X :: Touch Screen#0 > Finger#7
+Input   id=0x04 bit=264  16x1   data  var [0..16384] GD Y :: Touch Screen#0 > Finger#7
+Input   id=0x04 bit=280  6x1   data  var [0..63] Contact Identifier :: Touch Screen#0 > Finger#8
+Input   id=0x04 bit=286  1x1   data  var [0..1] Tip Switch :: Touch Screen#0 > Finger#8
+Input   id=0x04 bit=287  1x1   const var [0..1] - :: Touch Screen#0 > Finger#8
+Input   id=0x04 bit=288  16x1   data  var [0..16384] GD X :: Touch Screen#0 > Finger#8
+Input   id=0x04 bit=304  16x1   data  var [0..16384] GD Y :: Touch Screen#0 > Finger#8
+Input   id=0x04 bit=320  6x1   data  var [0..63] Contact Identifier :: Touch Screen#0 > Finger#9
+Input   id=0x04 bit=326  1x1   data  var [0..1] Tip Switch :: Touch Screen#0 > Finger#9
+Input   id=0x04 bit=327  1x1   const var [0..1] - :: Touch Screen#0 > Finger#9
+Input   id=0x04 bit=328  16x1   data  var [0..16384] GD X :: Touch Screen#0 > Finger#9
+Input   id=0x04 bit=344  16x1   data  var [0..16384] GD Y :: Touch Screen#0 > Finger#9
+Input   id=0x04 bit=360  6x1   data  var [0..63] Contact Identifier :: Touch Screen#0 > Finger#10
+Input   id=0x04 bit=366  1x1   data  var [0..1] Tip Switch :: Touch Screen#0 > Finger#10
+Input   id=0x04 bit=367  1x1   const var [0..1] - :: Touch Screen#0 > Finger#10
+Input   id=0x04 bit=368  16x1   data  var [0..16384] GD X :: Touch Screen#0 > Finger#10
+Input   id=0x04 bit=384  16x1   data  var [0..16384] GD Y :: Touch Screen#0 > Finger#10
+Input   id=0x04 bit=400  32x1   data  var [0..2147483647] Scan Time :: Touch Screen#0
+Input   id=0x04 bit=432  8x1   data  var [0..127] Contact Count :: Touch Screen#0
+Input   id=0x04 bit=440  8x8   const var [0..127] - :: Touch Screen#0
+Feature id=0x02 bit=0    8x1   data  var [0..10] Contact Count Maximum :: Touch Screen#0
+Feature id=0x06 bit=0    8x256 data  var [0..255] FF00:00C5 :: Touch Screen#0
+Input   id=0x03 bit=0    8x63  data  var [0..255] FF00:0001 :: FF00:0001#11
+Output  id=0x03 bit=0    8x63  data  var [0..255] FF00:0001 :: FF00:0001#11
+Input   id=0x05 bit=0    1x5   data  var [0..1] Button 1,Button 2,0009:0003,0009:0004,0009:0005 :: GD Mouse#12 > GD Pointer#13
+Input   id=0x05 bit=5    3x1   const arr [0..1] - :: GD Mouse#12 > GD Pointer#13
+Input   id=0x05 bit=8    16x1   data  var [0..16384] GD X :: GD Mouse#12 > GD Pointer#13
+Input   id=0x05 bit=24   16x1   data  var [0..16384] GD Y :: GD Mouse#12 > GD Pointer#13
