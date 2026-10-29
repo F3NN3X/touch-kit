@@ -62,7 +62,7 @@ unsafe fn read(p: *const c_char) -> Result<String, String> {
     CStr::from_ptr(p).to_str().map(str::to_string).map_err(|e| format!("not UTF-8: {e}"))
 }
 
-/// The library version, e.g. `"1.2.0"`. Static: don't free it.
+/// The library version, e.g. `"1.2.1"`. Static: don't free it.
 #[no_mangle]
 pub extern "C" fn tk_version() -> *const c_char {
     concat!(env!("CARGO_PKG_VERSION"), "\0").as_ptr().cast()

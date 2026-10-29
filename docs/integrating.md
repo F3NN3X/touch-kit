@@ -67,7 +67,7 @@ recording at its real pace, so the CI and other developers don't need a panel.
 
 ```toml
 [dependencies]
-touch-core = { git = "https://github.com/F3NN3X/touch-kit", tag = "v1.2.0" }
+touch-core = { git = "https://github.com/F3NN3X/touch-kit", tag = "v1.2.1" }
 ```
 
 ```rust
@@ -183,8 +183,8 @@ Events code.
 
 ```toml
 # src-tauri/Cargo.toml
-touch-core = { git = "https://github.com/F3NN3X/touch-kit", tag = "v1.2.0" }
-touch-kit-tauri = { git = "https://github.com/F3NN3X/touch-kit", tag = "v1.2.0" }
+touch-core = { git = "https://github.com/F3NN3X/touch-kit", tag = "v1.2.1" }
+touch-kit-tauri = { git = "https://github.com/F3NN3X/touch-kit", tag = "v1.2.1" }
 ```
 
 ```rust
@@ -218,7 +218,7 @@ List the window in a capability (as `apps/panel/src-tauri/capabilities/default.j
 command.
 
 ```sh
-pnpm add "github:F3NN3X/touch-kit#v1.2.0&path:packages/touch-kit-web"
+pnpm add "github:F3NN3X/touch-kit#v1.2.1&path:packages/touch-kit-web"
 ```
 
 ```ts

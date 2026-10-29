@@ -20,7 +20,7 @@ typedef struct TkDevice TkDevice;
  * library thread, never the caller's UI thread. */
 typedef void (*TkCallback)(void *user, const char *json);
 
-/* e.g. "1.2.0"; static, don't free. */
+/* e.g. "1.2.1"; static, don't free. */
 const char *tk_version(void);
 
 /* The last error on this thread, or NULL; taken once. */

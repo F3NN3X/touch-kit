@@ -1,6 +1,6 @@
 {
   "name": "@touch-kit/web",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Webview half of touch-kit: touch-core messages from a Tauri Channel as DOM pointer events and gestures",
   "license": "MIT",
   "type": "module",

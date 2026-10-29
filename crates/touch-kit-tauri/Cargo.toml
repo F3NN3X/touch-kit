@@ -1,6 +1,6 @@
 [package]
 name = "touch-kit-tauri"
-version = "1.2.0"
+version = "1.2.1"
 edition = "2021"
 description = "Tauri glue for touch-core: a never-focused panel window and a Channel bridge to its webview"
 license = "MIT"

@@ -5,6 +5,8 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-10-29
+
 ### Changed
 
 - A touchscreen that is plugged in but still on its Windows driver now reports an error naming it
@@ -130,7 +132,8 @@ First public release: the panel app as a Windows installer, plus `touchprobe`.
 - Identify and calibration reached every panel window instead of only the one asked.
 - The settings calibration hint stayed on "tap the targets" after calibrating.
 
-[Unreleased]: https://github.com/F3NN3X/touch-kit/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/F3NN3X/touch-kit/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/F3NN3X/touch-kit/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/F3NN3X/touch-kit/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/F3NN3X/touch-kit/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/F3NN3X/touch-kit/compare/v1.0.0...v1.1.0
