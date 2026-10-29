@@ -53,12 +53,6 @@ fn list() -> Result<Vec<nusb::DeviceInfo>, Error> {
     Ok(nusb::list_devices().wait().map_err(|e| usb("listing USB devices", e))?.collect())
 }
 
-/// The devices `open` chooses from: `candidates` this process can read.
-fn openable(cfg: &DeviceConfig) -> Result<Vec<nusb::DeviceInfo>, Error> {
-    let ports: Vec<String> = candidates(cfg)?.into_iter().filter(|t| t.ready).map(|t| t.port).collect();
-    Ok(list()?.into_iter().filter(|d| ports.contains(&location(d))).collect())
-}
-
 /// Which of the connected `ports` a panel uses. Its own port if present. Otherwise a port no other
 /// panel claims (`taken`): the first one if the panel names no port, or the only one if it names a
 /// port that is gone (the panel was moved to another port).
@@ -74,12 +68,26 @@ pub fn select(ports: &[String], want: Option<&str>, taken: &[String]) -> Option<
     }
 }
 
+/// When no ready touchscreen fits `cfg`, the error for one that would once its driver is set up
+/// (`ready` false: on Windows, still bound to Windows' own driver), so the user is told what to do
+/// instead of waiting for a device that is already plugged in.
+pub fn needs_driver(found: &[Touchscreen], cfg: &DeviceConfig, taken: &[String]) -> Option<Error> {
+    let waiting: Vec<&Touchscreen> = found.iter().filter(|t| !t.ready).collect();
+    let ports: Vec<String> = waiting.iter().map(|t| t.port.clone()).collect();
+    let t = waiting[select(&ports, cfg.port.as_deref(), taken)?];
+    let name = t.product.clone().unwrap_or_else(|| format!("{:04x}:{:04x}", t.vid, t.pid));
+    Some(Error::Usb(format!("{name} found, but Windows still owns it: switch its driver to WinUSB (docs/driver-setup.md)")))
+}
+
 /// Opens the panel `cfg` describes; `taken` are the ports other panels use.
 pub fn open(cfg: &DeviceConfig, taken: &[String]) -> Result<Panel, Error> {
-    let devices = openable(cfg)?;
-    let ports: Vec<String> = devices.iter().map(location).collect();
-    let i = select(&ports, cfg.port.as_deref(), taken).ok_or_else(|| Error::NotFound(cfg.describe()))?;
-    let info = &devices[i];
+    let found = candidates(cfg)?;
+    let ready: Vec<String> = found.iter().filter(|t| t.ready).map(|t| t.port.clone()).collect();
+    let Some(i) = select(&ready, cfg.port.as_deref(), taken) else {
+        return Err(needs_driver(&found, cfg, taken).unwrap_or_else(|| Error::NotFound(cfg.describe())));
+    };
+    let device_info = list()?.into_iter().find(|d| location(d) == ready[i]).ok_or_else(|| Error::NotFound(cfg.describe()))?;
+    let info = &device_info;
 
     #[cfg(target_os = "windows")]
     {
@@ -141,7 +149,7 @@ pub fn open(cfg: &DeviceConfig, taken: &[String]) -> Result<Panel, Error> {
     };
     let rd = hid::parse(&rd_raw).map_err(Error::Descriptor)?;
 
-    let panel = Panel { _device: device, intf, iface, ep_in, mps, rd, rd_raw, port: ports[i].clone() };
+    let panel = Panel { _device: device, intf, iface, ep_in, mps, rd, rd_raw, port: ready[i].clone() };
     // This panel powers up in mouse mode (report 0x05) and switches to multi-touch only once the host
     // reads Contact Count Maximum, as Windows does when it sets up a touchscreen. Without the read,
     // a freshly enumerated panel (replug, driver swap) never sends touch reports. docs/PLAN.md §8.

@@ -20,7 +20,8 @@ everywhere.
 switches the device's driver to WinUSB once, with Zadig ([driver-setup.md](driver-setup.md)). Your
 app can't do this for them and shouldn't try. List the touchscreens instead (`touchscreens()` /
 `Touchscreens.List()`): `ready: false` means the device was found but still has its Windows driver,
-so show the user the steps. On Linux, a udev rule does the same job.
+so show the user the steps. A running device reports the same case as an `Error` status naming
+the touchscreen, rather than `Disconnected`. On Linux, a udev rule does the same job.
 
 **Panel pixels.** Every coordinate is in the panel's *physical* pixels, (0, 0) top-left, after
 rotation and flips. Tell touch-core the panel's size (`panel.width_px` / `height_px`, the monitor's
